@@ -1,6 +1,7 @@
 #include "menu.h"
 
 #include <SDL.h>
+#include <stdio.h>
 
 #include "asset_loader.h"
 

@@ -1,5 +1,7 @@
 #include "g_session_manager.h"
 
+#include <stdio.h>
+
 #include "game.h"
 #include "math/vector.h"
 
@@ -21,7 +23,7 @@ void initialize_game_session(G_Session_Manager* g_sess_mgr, Game* game,
 void add_ai_player_to_session(G_Session_Manager* g_sess_mgr) {
   Player* ai_player;
 
-  ai_player = add_enemy_player_ai(g_sess_mgr->game, NULL, 4, 32,
+  ai_player = add_enemy_player_ai(g_sess_mgr->game, NULL, 8, 32,
                                   (vec2d){.x = 1, .y = 0});
   if (ai_player == NULL) {
     printf("[ERROR] g_sess_mgr unable to add ai player\n");

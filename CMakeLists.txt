@@ -4,6 +4,9 @@ project(SDLToy)
 
 # Neovim users rejoice
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(BUILD_SHARED_LIBS FALSE)
+set(FETCHCONTENT_QUIET FALSE)
+#set(FETCHCONTENT_TRY_FIND_PACKAGE_MODE NEVER)
 
 include(FetchContent)
 
@@ -13,12 +16,14 @@ FetchContent_Declare(
     GIT_TAG release-2.28.4
 )
 
-FetchContent_GetProperties(SDL2)
+set(SDL2TTF_VENDORED TRUE)
+FetchContent_Declare(SDL2_ttf
+    GIT_REPOSITORY "https://github.com/libsdl-org/SDL_ttf.git"
+    GIT_TAG release-2.20.1
+    GIT_PROGRESS TRUE
+)
 
-if(NOT SDL2_POPULATED)
-    FetchContent_Populate(SDL2)
-    add_subdirectory(${sdl2_SOURCE_DIR} ${sdl2_BINARY_DIR})
-endif()
+FetchContent_MakeAvailable(SDL2 SDL2_ttf)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wall -g")
@@ -26,7 +31,7 @@ endif()
 
 file(COPY ./assets DESTINATION ./)
 
-add_executable(sdltoy 
+add_executable(geometry-netplay
   src/main.c
   src/player.c
   src/renderer_manager.c
@@ -43,6 +48,10 @@ add_executable(sdltoy
   src/math/shapes.c
   src/math/collections.c
   src/renderer/particle.c
+  src/renderer/font.c
+  src/renderer/hud.c
+  src/renderer/text.c
 )
 
-target_link_libraries(sdltoy SDL2 m)
+target_link_libraries(geometry-netplay SDL2 SDL2main SDL2_ttf m)
+target_include_directories(geometry-netplay PUBLIC ${sdl2_SOURCE_DIR}/include)
