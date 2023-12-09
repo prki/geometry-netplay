@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include <stdio.h>
+
 #include "game_event.h"
 #include "math/collections.h"
 #include "math/shapes.h"
@@ -26,7 +28,7 @@ void _deinitialize_game(Game* game) {
 
 Player* _initialize_pc_player(void) {
   vec2d initial_ship_position = {.x = 600, .y = 600};
-  double hurtcirc_radius = 4;
+  double hurtcirc_radius = 8;
   size_t ship_width = 32;
   vec2d shoot_direction = {.x = 0, .y = -1};
 

@@ -5,6 +5,7 @@
 #include "game.h"
 #include "math/shapes.h"
 #include "player.h"
+#include "renderer/hud.h"
 #include "renderer/particle.h"
 
 #define MAX_RENDERABLE_PLAYERS 32
@@ -42,6 +43,7 @@ typedef struct RendererManager {
   GameEventQueue* game_event_queue;
   GameWorld* game_world;  // [TODO] Grow from game_world to include renderable
                           // rectangles with different textures etc
+  R_HUD* hud;
 } RendererManager;
 
 RendererManager* new_renderer_manager(SDL_Renderer* renderer);

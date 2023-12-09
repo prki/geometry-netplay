@@ -1,6 +1,7 @@
 #include "asset_loader.h"
 
 #include <SDL.h>
+#include <stdio.h>
 
 SDL_Texture* load_texture_from_bmp(SDL_Renderer* renderer,
                                    const char* file_path) {

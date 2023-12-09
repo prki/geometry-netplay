@@ -1,6 +1,7 @@
 #include "renderer_manager.h"
 
 #include <SDL.h>
+#include <stdio.h>
 
 #include "asset_loader.h"
 #include "game.h"
@@ -35,8 +36,18 @@ RendererManager* new_renderer_manager(SDL_Renderer* renderer) {
     free(mngr);
     return NULL;
   }
+
+  R_HUD* hud = new_r_hud(renderer);
+  if (hud == NULL) {
+    printf("[ERROR] err init r_manager - NULL r_hud\n");
+    free(mngr);
+    destroy_particle_pool(particle_pool);
+    return NULL;
+  }
+
   mngr->renderer = renderer;
   mngr->particle_pool = particle_pool;
+  mngr->hud = hud;
 
   _nullify_renderable_players(mngr);
   mngr->renderable_players_size = 0;
@@ -66,6 +77,9 @@ void destroy_renderer_manager(RendererManager* r_mngr) {
     }
     if (r_mngr->particle_pool != NULL) {
       destroy_particle_pool(r_mngr->particle_pool);
+    }
+    if (r_mngr->hud != NULL) {
+      destroy_r_hud(r_mngr->hud);
     }
 
     SDL_DestroyRenderer(r_mngr->renderer);
@@ -343,6 +357,14 @@ void render_particles(RendererManager* r_mngr) {
   }
 }
 
+void render_hud(RendererManager* r_mngr) {
+  // render score
+  int wid = r_mngr->hud->score_txtr_wid;
+  int hei = r_mngr->hud->score_txtr_hei;
+  SDL_Rect dest_rect = {.x = 0, .y = 0, .w = wid, .h = hei};
+  SDL_RenderCopy(r_mngr->renderer, r_mngr->hud->score_txtr, NULL, &dest_rect);
+}
+
 void render_frame(RendererManager* r_mngr) {
   // background clear
   // SDL_SetRenderDrawColor(r_mngr->renderer, 60, 60, 60, 255);
@@ -373,6 +395,7 @@ void render_frame(RendererManager* r_mngr) {
   render_bullets(r_mngr);
   update_particles(r_mngr->particle_pool);
   render_particles(r_mngr);
+  render_hud(r_mngr);
 
   SDL_RenderPresent(r_mngr->renderer);
 }
