@@ -12,6 +12,7 @@ typedef struct Player {
   vec2d shoot_direction;
   int shoot_timer;
   int shoot_interval;
+  int score;
 } Player;
 
 Player* new_player(vec2d ship_position, double hurtcirc_radius,

@@ -26,6 +26,7 @@ Player* new_player(vec2d ship_position, double hurtcirc_radius,
   plr->shoot_timer = 0;
   plr->shoot_interval = 6;
   plr->movement_direction = (vec2d){.x = 0, .y = 0};
+  plr->score = 0;
 
   return plr;
 }
@@ -99,8 +100,8 @@ void shoot_bullet(Player* plr, BulletPool* bullet_pool) {
   bullet1_dir = vec2d_normalize(&bullet1_dir);
   bullet2_dir = vec2d_normalize(&bullet2_dir);  // Floating error or not?
 
-  initialize_bullet_shot(bullet, bullet1_dir, bullet1_pos);
-  initialize_bullet_shot(bullet2, bullet2_dir, bullet2_pos);
+  initialize_bullet_shot(bullet, bullet1_dir, bullet1_pos, plr);
+  initialize_bullet_shot(bullet2, bullet2_dir, bullet2_pos, plr);
 
   plr->shoot_timer++;
 }

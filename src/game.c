@@ -274,11 +274,10 @@ void handle_player_death(Game* game, Player* player, Bullet* bullet) {
   GameEvent* evt =
       new_bullet_impact_event(player->player_ship.hurtcirc.position);
   if (evt == NULL) {
-    printf(
-        "[WARN] player death bullet impact event null => did not enqueue "
-        "evt\n");
+    printf("[WARN] player death bullet impact event null => no enqueue\n");
+  } else {
+    evt_queue_enqueue(game->evt_queue, evt);
   }
-  evt_queue_enqueue(game->evt_queue, evt);
 
   relocate_ship(&player->player_ship, spawn_point);
 }
@@ -298,6 +297,9 @@ void update_bullets(Game* game) {
       Player* player_hit = collide_bullet_players(curr_bullet, game);
       if (player_hit != NULL) {
         handle_player_death(game, player_hit, curr_bullet);
+        Player* bullet_owner = curr_bullet->owner;
+        bullet_owner->score += 1;
+        printf("Updated bullet owner score to: %d\n", bullet_owner->score);
       }
     }
   }

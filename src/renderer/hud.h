@@ -2,6 +2,7 @@
 #define _HUD_H_
 #include <SDL.h>
 
+#include "../player.h"
 #include "text.h"
 
 typedef struct {
@@ -10,9 +11,12 @@ typedef struct {
   int score_txtr_hei;
   R_Text* score_text;
   R_Font* hud_font;
-  int score;
+
+  // Not owned
+  // const Player* pc_player;
 } R_HUD;
 
+// R_HUD* new_r_hud(SDL_Renderer* renderer, const Player* player);
 R_HUD* new_r_hud(SDL_Renderer* renderer);
 void destroy_r_hud(R_HUD* r_hud);
 

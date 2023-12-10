@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "player.h"
+
 // [TODO] To consider bullet velocity to be a member variable of e.g.
 // gun/powerup/player
 #define BULLET_VELOCITY 16
@@ -49,7 +51,7 @@ void update_bullet(Bullet* bullet) {
 // [TODO] Rotate rectangle so that bullet hitbox is rotated by angle of shot vs
 // (0, -1)?
 void initialize_bullet_shot(Bullet* bullet, const vec2d direction,
-                            const vec2d position) {
+                            const vec2d position, Player* bullet_owner) {
   if (bullet == NULL) {
     printf("[WARN] initialize_shot_bullet() with NULL passed\n");
     return;
@@ -66,6 +68,7 @@ void initialize_bullet_shot(Bullet* bullet, const vec2d direction,
   rotate_rectangle(&bullet->hitbox, rot_angle);
   bullet->velocity = BULLET_VELOCITY;
   bullet->direction = direction;
+  bullet->owner = bullet_owner;
 
   enable_bullet(bullet);
 }
