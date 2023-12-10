@@ -27,8 +27,6 @@ R_HUD* new_r_hud(SDL_Renderer* renderer) {
     return NULL;
   }
 
-  ret->score = 5;
-
   SDL_Color color = {.r = 255, .g = 255, .b = 255, .a = 255};
   int wid, hei;
   SDL_Texture* txtr = create_text_texture(renderer, text, color, &wid, &hei);
@@ -43,10 +41,7 @@ R_HUD* new_r_hud(SDL_Renderer* renderer) {
   ret->score_txtr_hei = hei;
   ret->hud_font = font;
   ret->score_text = text;
-  ret->score = 5;
-
-  printf("[DBG] score txtr wid: %d, in hud: %d\n", wid, ret->score_txtr_wid);
-  printf("[DBG] score txtr hei: %d, in hud: %d\n", hei, ret->score_txtr_hei);
+  // ret->pc_player = player;
 
   return ret;
 }

@@ -17,7 +17,7 @@ void enable_bullet(Bullet* bullet);
 void initialize_bullet(Bullet* bullet);
 void update_bullet(Bullet* bullet);
 void initialize_bullet_shot(Bullet* bullet, const vec2d direction,
-                            const vec2d position);
+                            const vec2d position, struct Player* bullet_owner);
 
 typedef struct BulletPool {
   Bullet* bullets;
