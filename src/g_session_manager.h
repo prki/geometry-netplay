@@ -1,6 +1,6 @@
 #ifndef _G_SESSION_MANAGER_H_
 #include "game.h"
-#include "renderer_manager.h"
+#include "renderer/renderer_manager.h"
 
 typedef struct G_Session_Manager {
   Game* game;

@@ -96,9 +96,6 @@ void destroy_text(R_Text* text) {
     if (text->text_buffer != NULL) {
       free(text->text_buffer);
     }
-    if (text->font != NULL) {
-      destroy_font((R_Font*)text->font);
-    }
 
     free(text);
   }

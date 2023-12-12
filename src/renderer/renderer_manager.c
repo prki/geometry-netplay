@@ -1,18 +1,21 @@
 #include "renderer_manager.h"
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 
-#include "asset_loader.h"
-#include "game.h"
-#include "game_world.h"
-#include "math/vector.h"
-#include "renderer/particle.h"
+#include "../asset_loader.h"
+#include "../game.h"
+#include "../game_world.h"
+#include "../math/vector.h"
+#include "hud.h"
+#include "particle.h"
 
 // [TODO] We probably want to move these to particle.[c|h]
 #define MAX_PARTICLE_VELOCITY 4
 #define MAX_PARTICLE_DECAY_RATE 20
 #define MIN_PARTICLE_DECAY_RATE 5
+#define MAX_FONTSTORAGE 16
 
 void _nullify_renderable_players(RendererManager* r_mngr) {
   for (size_t i = 0; i < MAX_RENDERABLE_PLAYERS; i++) {
@@ -21,27 +24,44 @@ void _nullify_renderable_players(RendererManager* r_mngr) {
   }
 }
 
+// [TODO] Create a better alloc/free flow
 RendererManager* new_renderer_manager(SDL_Renderer* renderer) {
   if (renderer == NULL) {
     printf("[ERROR] Cannot initialize r_manager - NULL SDL_Renderer passed\n");
     return NULL;
   }
+  if (TTF_Init() < 0) {
+    printf("[ERROR] Cannot initialize TTF by r_manager\n");
+    return NULL;
+  }
   RendererManager* mngr = malloc(sizeof(RendererManager));
   if (mngr == NULL) {
+    TTF_Quit();
     return NULL;
   }
   ParticlePool* particle_pool = new_particle_pool();
   if (particle_pool == NULL) {
     printf("[ERROR] Cannot initialize r_manager - NULL particle pool\n");
+    TTF_Quit();
     free(mngr);
     return NULL;
   }
-
-  R_HUD* hud = new_r_hud(renderer);
-  if (hud == NULL) {
-    printf("[ERROR] err init r_manager - NULL r_hud\n");
+  FontStorage* fs = r_new_font_storage(MAX_FONTSTORAGE);
+  if (fs == NULL) {
+    printf("[ERROR] err init r_manager - NULL fontstorage\n");
+    TTF_Quit();
     free(mngr);
     destroy_particle_pool(particle_pool);
+    return NULL;
+  }
+
+  R_HUD* hud = new_r_hud(fs);
+  if (hud == NULL) {
+    printf("[ERROR] err init r_manager - NULL r_hud\n");
+    TTF_Quit();
+    free(mngr);
+    destroy_particle_pool(particle_pool);
+    r_destroy_font_storage(fs);
     return NULL;
   }
 
@@ -53,6 +73,7 @@ RendererManager* new_renderer_manager(SDL_Renderer* renderer) {
   mngr->renderable_players_size = 0;
 
   mngr->game_event_queue = NULL;
+  mngr->font_storage = fs;
 
   return mngr;
 }
@@ -81,10 +102,33 @@ void destroy_renderer_manager(RendererManager* r_mngr) {
     if (r_mngr->hud != NULL) {
       destroy_r_hud(r_mngr->hud);
     }
+    if (r_mngr->font_storage != NULL) {
+      r_destroy_font_storage(r_mngr->font_storage);
+    }
 
     SDL_DestroyRenderer(r_mngr->renderer);
+    TTF_Quit();
     free(r_mngr);
   }
+}
+
+// Function loading font assets used by the game.
+// Returns 1 on success, 0 on failure. Assumes TTF_Init()
+// has already been called.
+int r_load_assets_fonts(RendererManager* r_mngr) {
+  R_Font* font = new_font("./assets/fonts/Arial.ttf", 12);
+  if (font == NULL) {
+    printf("[ERROR] err loading assets (fonts)\n");
+    return 0;
+  }
+
+  font = r_insert_new_font(r_mngr->font_storage, font);
+  if (font == NULL) {
+    printf("[ERROR] err loading assets (fonts)\n");
+    return 0;
+  }
+
+  return 1;
 }
 
 int register_player(RendererManager* r_mngr, Player* plr) {
@@ -357,14 +401,6 @@ void render_particles(RendererManager* r_mngr) {
   }
 }
 
-void render_hud(RendererManager* r_mngr) {
-  // render score
-  int wid = r_mngr->hud->score_txtr_wid;
-  int hei = r_mngr->hud->score_txtr_hei;
-  SDL_Rect dest_rect = {.x = 0, .y = 0, .w = wid, .h = hei};
-  SDL_RenderCopy(r_mngr->renderer, r_mngr->hud->score_txtr, NULL, &dest_rect);
-}
-
 void render_frame(RendererManager* r_mngr) {
   // background clear
   // SDL_SetRenderDrawColor(r_mngr->renderer, 60, 60, 60, 255);
@@ -395,7 +431,7 @@ void render_frame(RendererManager* r_mngr) {
   render_bullets(r_mngr);
   update_particles(r_mngr->particle_pool);
   render_particles(r_mngr);
-  render_hud(r_mngr);
+  r_render_hud(r_mngr->hud, r_mngr->renderer);
 
   SDL_RenderPresent(r_mngr->renderer);
 }

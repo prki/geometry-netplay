@@ -5,45 +5,66 @@
 #include "font.h"
 #include "text.h"
 
-R_HUD* new_r_hud(SDL_Renderer* renderer) {
-  R_Font* font = new_font("./assets/fonts/Arial.ttf", 12);
-  if (font == NULL) {
-    printf("[ERROR] Error creating HUD - font NULL\n");
+R_HUD* new_r_hud(const FontStorage* font_storage) {
+  R_HUD* hud = malloc(sizeof(R_HUD));
+  if (hud == NULL) {
+    printf("[ERROR] Error creating HUD - R_HUD malloc NULL\n");
     return NULL;
+  }
+
+  hud->score_txtr = NULL;
+  hud->score_txtr_wid = 0;
+  hud->score_txtr_hei = 0;
+  hud->hud_font = NULL;
+  hud->score_text = NULL;
+  hud->font_storage = font_storage;
+
+  return hud;
+}
+
+// Function initializing HUD with sensible values at the start of a game.
+// Already creates renderable textures. As such, requires SDL Renderer to
+// be passed.
+int r_initialize_hud(R_HUD* r_hud, SDL_Renderer* renderer) {
+  if (r_hud == NULL) {
+    printf("[ERROR] err initializing hud - r_hud == NULL\n");
+    return 0;
+  }
+
+  R_Font* font = r_get_font_by_id(r_hud->font_storage, 0);
+  if (font == NULL) {
+    printf("[ERROR] Err init HUD - font ID 0 NULL\n");
+    return 0;
   }
 
   R_Text* text = new_r_text("Score", 6, font);
   if (text == NULL) {
-    printf("[ERROR] Error creating HUD - text NULL\n");
-    destroy_font(font);
-    return NULL;
+    printf("[ERROR] Err init HUD - text NULL\n");
+    return 0;
   }
   text->font = font;
-
-  R_HUD* ret = malloc(sizeof(R_HUD));
-  if (ret == NULL) {
-    printf("[ERROR] Error creating HUD - R_HUD malloc NULL\n");
-    destroy_text(text);
-    return NULL;
-  }
 
   SDL_Color color = {.r = 255, .g = 255, .b = 255, .a = 255};
   int wid, hei;
   SDL_Texture* txtr = create_text_texture(renderer, text, color, &wid, &hei);
   if (txtr == NULL) {
-    printf("[ERROR] Error creating HUD - R_HUD creating text texture fail\n");
-    destroy_text(text);
-    free(ret);
-    return NULL;
+    printf("[ERROR] Err initializing HUD - r_hud text texture creation fail\n");
+    return 0;
   }
-  ret->score_txtr = txtr;
-  ret->score_txtr_wid = wid;
-  ret->score_txtr_hei = hei;
-  ret->hud_font = font;
-  ret->score_text = text;
-  // ret->pc_player = player;
+  r_hud->score_txtr = txtr;
+  r_hud->score_txtr_wid = wid;
+  r_hud->score_txtr_hei = hei;
+  r_hud->hud_font = font;
+  r_hud->score_text = text;
 
-  return ret;
+  return 1;
+}
+
+void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer) {
+  int wid = r_hud->score_txtr_wid;
+  int hei = r_hud->score_txtr_hei;
+  SDL_Rect dest_rect = {.x = 0, .y = 0, .w = wid, .h = hei};
+  SDL_RenderCopy(renderer, r_hud->score_txtr, NULL, &dest_rect);
 }
 
 // Function freeing R_HUD* resources is safe to call on NULL
