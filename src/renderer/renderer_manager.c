@@ -25,15 +25,21 @@ void _nullify_renderable_players(RendererManager* r_mngr) {
 }
 
 // [TODO] Create a better alloc/free flow
-RendererManager* new_renderer_manager(SDL_Renderer* renderer) {
+RendererManager* new_renderer_manager(SDL_Window* window,
+                                      SDL_Renderer* renderer) {
   if (renderer == NULL) {
     printf("[ERROR] Cannot initialize r_manager - NULL SDL_Renderer passed\n");
+    return NULL;
+  }
+  if (window == NULL) {
+    printf("[ERROR] Cannot initialize r_manager - NULL SDL_Window passed\n");
     return NULL;
   }
   if (TTF_Init() < 0) {
     printf("[ERROR] Cannot initialize TTF by r_manager\n");
     return NULL;
   }
+
   RendererManager* mngr = malloc(sizeof(RendererManager));
   if (mngr == NULL) {
     TTF_Quit();
@@ -431,6 +437,7 @@ void render_frame(RendererManager* r_mngr) {
   render_bullets(r_mngr);
   update_particles(r_mngr->particle_pool);
   render_particles(r_mngr);
+  r_update_hud(r_mngr->hud, r_mngr->renderer);
   r_render_hud(r_mngr->hud, r_mngr->renderer);
 
   SDL_RenderPresent(r_mngr->renderer);

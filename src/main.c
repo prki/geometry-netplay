@@ -119,7 +119,7 @@ int main(void) {
     return 1;
   }
 
-  r_mngr = new_renderer_manager(renderer);
+  r_mngr = new_renderer_manager(window, renderer);
   if (r_mngr == NULL) {
     SDL_Quit();
     return 1;
@@ -138,7 +138,7 @@ int main(void) {
     return 1;
   }
   // [TODO] Shouldn't this also clean up game resources and such?
-  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer);
+  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player);
   if (!succ) {
     SDL_Quit();
     return 1;

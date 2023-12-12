@@ -41,6 +41,17 @@ R_Text* new_r_text(const char* text_buffer, size_t text_length,
   ret->text_len = text_length;
   ret->font = font;
 
+  SDL_Color white_color = {.r = 255, .g = 255, .b = 255, .a = 255};
+  SDL_Surface* srfc = TTF_RenderUTF8_Solid(
+      (TTF_Font*)font->font, (const char*)ret->text_buffer, white_color);
+  if (srfc == NULL) {
+    printf("[ERROR] Err creating SDL Surface in new_r_text: %s\n",
+           TTF_GetError());
+    free(ret);
+    return NULL;
+  }
+  ret->text_surface = srfc;
+
   return ret;
 }
 
@@ -78,6 +89,7 @@ SDL_Texture* create_text_texture(SDL_Renderer* renderer, R_Text* text,
 // Function fails if text_length > r_text capacity. On fail, NULL is returned,
 // but the R_Text* output parameter is not modified.
 // This function is unsafe to call with NULL text or text_buffer.
+// [TODO] Update surface
 char* change_text(R_Text* text, const char* text_buffer, size_t text_length) {
   if (text_length > text->text_capacity) {
     printf("[ERROR] Changing text with one exceeding max capacity\n");
@@ -90,12 +102,20 @@ char* change_text(R_Text* text, const char* text_buffer, size_t text_length) {
   return text->text_buffer;
 }
 
+void r_render_text_blit(SDL_Surface* window_surface, const R_Text* text,
+                        const int x, const int y) {
+  SDL_Rect dest_rect = {
+      .h = text->text_surface->h, .w = text->text_surface->w, .x = x, .y = y};
+  SDL_BlitSurface(text->text_surface, NULL, window_surface, &dest_rect);
+}
+
 // [TODO] Text seems to destroy font, but should it actually own it?
 void destroy_text(R_Text* text) {
   if (text != NULL) {
     if (text->text_buffer != NULL) {
       free(text->text_buffer);
     }
+    SDL_FreeSurface(text->text_surface);
 
     free(text);
   }
