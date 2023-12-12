@@ -47,7 +47,8 @@ typedef struct RendererManager {
   R_HUD* hud;
 } RendererManager;
 
-RendererManager* new_renderer_manager(SDL_Renderer* renderer);
+RendererManager* new_renderer_manager(SDL_Window* window,
+                                      SDL_Renderer* renderer);
 void destroy_renderer_manager(RendererManager* r_mngr);
 int register_game(RendererManager* r_mngr, Game* game);
 int register_player(RendererManager* r_mngr, Player* plr);
