@@ -34,7 +34,6 @@ file(COPY ./assets DESTINATION ./)
 add_executable(geometry-netplay
   src/main.c
   src/player.c
-  src/renderer_manager.c
   src/menu.c
   src/asset_loader.c
   src/game.c
@@ -47,6 +46,7 @@ add_executable(geometry-netplay
   src/math/trigonometry.c
   src/math/shapes.c
   src/math/collections.c
+  src/renderer/renderer_manager.c
   src/renderer/particle.c
   src/renderer/font.c
   src/renderer/hud.c

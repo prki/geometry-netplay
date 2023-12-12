@@ -6,13 +6,13 @@
 #include "constants.h"
 #include "g_session_manager.h"
 #include "game.h"
-#include "renderer_manager.h"
+#include "renderer/renderer_manager.h"
 
 /* [TODO] [BUG] If window succeeds but renderer does not, no sign
  * which to destroy*/
 int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer) {
   *window =
-      SDL_CreateWindow("mirri=king", SDL_WINDOWPOS_CENTERED,
+      SDL_CreateWindow("Pekelna parba", SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
   if (*window == NULL) {
     printf("[ERROR] Error creating window: %s\n", SDL_GetError());
@@ -125,8 +125,21 @@ int main(void) {
     return 1;
   }
 
+  succ = r_load_assets_fonts(r_mngr);
+  if (!succ) {
+    SDL_Quit();
+    destroy_renderer_manager(r_mngr);
+    return 1;
+  }
+
   Game* game = initialize_game();
   if (game == NULL) {
+    SDL_Quit();
+    return 1;
+  }
+  // [TODO] Shouldn't this also clean up game resources and such?
+  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer);
+  if (!succ) {
     SDL_Quit();
     return 1;
   }
@@ -161,25 +174,3 @@ int main(void) {
 
   return 0;
 }
-
-// [TODO] Remove once events are implemented
-/*
-int main(void) {
-  GameEvent* evt = new_game_event(RECT_COLLISION);
-  RectCollisionData* data = new_rect_collision_data(&r, &r2);
-  evt->data = data;
-
-  //Rectangle r = new_rectangle(50, 50, 50, 50);
-  //Rectangle r2 = new_rectangle(50, 50, 50, 50);
-  RectCollisionData* data = new_rect_collision_data(&r, &r2);
-  evt->data = data;
-
-  if (evt->type == RECT_COLLISION) {
-    ((RectCollisionData*)evt->data)->rect1;
-    print_rectangle(((RectCollisionData*)(evt->data))->rect1);
-    print_rectangle(((RectCollisionData*)(evt->data))->rect2);
-  }
-
-  destroy_game_event(evt);
-}
-*/

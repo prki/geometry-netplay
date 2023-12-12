@@ -2,11 +2,11 @@
 #define _RENDERER_MANAGER_H
 #include <SDL.h>
 
-#include "game.h"
-#include "math/shapes.h"
-#include "player.h"
-#include "renderer/hud.h"
-#include "renderer/particle.h"
+#include "../game.h"
+#include "../math/shapes.h"
+#include "../player.h"
+#include "hud.h"
+#include "particle.h"
 
 #define MAX_RENDERABLE_PLAYERS 32
 
@@ -43,6 +43,7 @@ typedef struct RendererManager {
   GameEventQueue* game_event_queue;
   GameWorld* game_world;  // [TODO] Grow from game_world to include renderable
                           // rectangles with different textures etc
+  FontStorage* font_storage;
   R_HUD* hud;
 } RendererManager;
 
@@ -52,6 +53,7 @@ int register_game(RendererManager* r_mngr, Game* game);
 int register_player(RendererManager* r_mngr, Player* plr);
 void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr);
 void draw_rectangle_outline(RendererManager* r_mngr, const Rectangle* rect);
+int r_load_assets_fonts(RendererManager* r_mngr);
 
 void render_frame(RendererManager* r_mngr);
 
