@@ -299,7 +299,6 @@ void update_bullets(Game* game) {
         handle_player_death(game, player_hit, curr_bullet);
         Player* bullet_owner = curr_bullet->owner;
         bullet_owner->score += 1;
-        printf("Updated bullet owner score to: %d\n", bullet_owner->score);
       }
     }
   }
