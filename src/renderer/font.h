@@ -24,7 +24,7 @@ typedef struct {
 } FontStorage;
 
 FontStorage* r_new_font_storage(size_t cap);
-R_Font* r_insert_new_font(FontStorage* fs, R_Font* font);
+int r_insert_new_font(FontStorage* fs, R_Font* font);
 R_Font* r_get_font_by_id(const FontStorage* fs, const size_t id);
 void r_destroy_font_storage(FontStorage* fs);
 

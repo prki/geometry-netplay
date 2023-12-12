@@ -74,10 +74,10 @@ void r_destroy_font_storage(FontStorage* fs) {
   }
 }
 
-R_Font* r_insert_new_font(FontStorage* fs, R_Font* font) {
+int r_insert_new_font(FontStorage* fs, R_Font* font) {
   if (fs == NULL) {
     printf("[ERROR] Attempted to insert font into NULL storage\n");
-    return NULL;
+    return 0;
   }
   if (font == NULL) {
     printf("[ERROR] Attempted to insert NULL font into storage\n");
@@ -85,13 +85,13 @@ R_Font* r_insert_new_font(FontStorage* fs, R_Font* font) {
   if (fs->fonts_size >= fs->fonts_cap) {
     printf("[ERROR] Cannot insert new font to storage, size %zu >= cap %zu\n",
            fs->fonts_size, fs->fonts_cap);
-    return NULL;
+    return 0;
   }
 
   fs->fonts[fs->fonts_size] = font;
   fs->fonts_size += 1;
 
-  return fs->fonts[fs->fonts_size];
+  return 1;
 }
 
 // Utility function for retrieving a specific font by ID.

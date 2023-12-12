@@ -118,13 +118,13 @@ void destroy_renderer_manager(RendererManager* r_mngr) {
 int r_load_assets_fonts(RendererManager* r_mngr) {
   R_Font* font = new_font("./assets/fonts/Arial.ttf", 12);
   if (font == NULL) {
-    printf("[ERROR] err loading assets (fonts)\n");
+    printf("[ERROR] err loading assets (fonts) - font load failure\n");
     return 0;
   }
 
-  font = r_insert_new_font(r_mngr->font_storage, font);
-  if (font == NULL) {
-    printf("[ERROR] err loading assets (fonts)\n");
+  int succ = r_insert_new_font(r_mngr->font_storage, font);
+  if (!succ) {
+    printf("[ERROR] err loading assets (fonts) - font insert failure\n");
     return 0;
   }
 
