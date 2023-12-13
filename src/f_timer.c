@@ -1,7 +1,6 @@
-#include "timer.h"
+#include "f_timer.h"
 
 #include <SDL.h>
-#include <stdio.h>
 #include <string.h>
 
 void f_timer_init(F_Timer* timer) {
@@ -31,13 +30,12 @@ void f_timer_update(F_Timer* timer) {
   f_timer_update_times(timer);
 }
 
-double f_timer_calc_fps(F_Timer* timer) {
+double f_timer_calc_fps(const F_Timer* timer) {
   Uint64 deltas = 0;
   for (size_t i = 0; i < F_TIMER_HISTORY_SIZE; i++) {
     deltas += timer->times[i];
   }
   double avg_delta = (double)deltas / (double)F_TIMER_HISTORY_SIZE;
-  printf("avg_delta: %f\n", avg_delta);
 
   double ret = (1000.0 / avg_delta);
   return ret;

@@ -4,10 +4,10 @@
 
 #include "SDL_video.h"
 #include "constants.h"
+#include "f_timer.h"
 #include "g_session_manager.h"
 #include "game.h"
 #include "renderer/renderer_manager.h"
-#include "timer.h"
 
 /* [TODO] [BUG] If window succeeds but renderer does not, no sign
  * which to destroy*/
@@ -21,6 +21,7 @@ int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer) {
   }
 
   *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_PRESENTVSYNC);
+  //*renderer = SDL_CreateRenderer(*window, -1, 0);
   if (*renderer == NULL) {
     printf("[ERROR] Error creating renderer: %s\n", SDL_GetError());
     return 0;
@@ -138,8 +139,14 @@ int main(void) {
     SDL_Quit();
     return 1;
   }
-  // [TODO] Shouldn't this also clean up game resources and such?
-  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player);
+
+  F_Timer f_timer;
+  f_timer_init(&f_timer);
+
+  // [TODO] Shouldn't this also clean up game resources and such? (the if
+  // branch)
+  succ =
+      r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player, &f_timer);
   if (!succ) {
     SDL_Quit();
     return 1;
@@ -155,9 +162,6 @@ int main(void) {
   initialize_game_session(&g_sess_mgr, game, r_mngr);
   add_ai_player_to_session(&g_sess_mgr);
 
-  F_Timer f_timer;
-  f_timer_init(&f_timer);
-
   int keep_running = 1;
   SDL_Event evt;
   while (keep_running) {
@@ -167,8 +171,6 @@ int main(void) {
       }
     }
     f_timer_update(&f_timer);
-    double fps = f_timer_calc_fps(&f_timer);
-    printf("[TIMER] FPS: %f\n", fps);
     game_update(game);
 
     render_frame(r_mngr);
