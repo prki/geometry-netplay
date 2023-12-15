@@ -2,6 +2,9 @@
 #include "game.h"
 #include "renderer/renderer_manager.h"
 
+#define G_GAMETYPE_LOCAL_MULTIPLAYER 1
+#define G_GAMETYPE_LOCAL_SINGLEPLAYER 2
+
 typedef struct G_Session_Manager {
   Game* game;
   RendererManager* r_mngr;
@@ -10,6 +13,7 @@ typedef struct G_Session_Manager {
 void initialize_game_session(G_Session_Manager* g_sess_mgr, Game* game,
                              RendererManager* r_mngr);
 void add_ai_player_to_session(G_Session_Manager* g_sess_mgr);
+int setup_game_session(G_Session_Manager* g_sess_mgr, int gametype);
 
 #define _G_SESSION_MANAGER_H_
 #endif  // _G_SESSION_MANAGER_H_

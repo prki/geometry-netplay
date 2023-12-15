@@ -8,9 +8,10 @@
 #define MAX_RECTS 300
 #define MAX_AI_PLAYERS 16
 #define SPAWN_POINTS_MAX_SIZE 32
+#define G_MAX_PC_PLAYERS 2
 
 typedef struct Game {
-  Player* player;
+  Player* players[G_MAX_PC_PLAYERS];
   Player* enemy_players_ai[MAX_AI_PLAYERS];
   BulletPool* bullet_pool;
   GameEventQueue* evt_queue;
