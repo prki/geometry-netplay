@@ -9,8 +9,8 @@
 // text_buffer. The function fails and returns NULL if any of the pointers
 // passed is NULL or if text_length is more than maximum allowed capacity,
 // defined in the source file text.h.
-R_Text* new_r_text(const char* text_buffer, size_t text_length,
-                   const R_Font* font) {
+R_Text* new_r_text(SDL_Renderer* renderer, const char* text_buffer,
+                   size_t text_length, const R_Font* font) {
   if (font == NULL) {
     printf("[ERROR] Attempted new r_text with NULL r_font, return NULL\n");
     return NULL;
@@ -42,15 +42,15 @@ R_Text* new_r_text(const char* text_buffer, size_t text_length,
   ret->font = font;
 
   SDL_Color white_color = {.r = 255, .g = 255, .b = 255, .a = 255};
-  SDL_Surface* srfc = TTF_RenderUTF8_Solid(
-      (TTF_Font*)font->font, (const char*)ret->text_buffer, white_color);
-  if (srfc == NULL) {
+  SDL_Texture* txtr = create_text_texture(
+      renderer, ret, white_color, &ret->texture_width, &ret->texture_height);
+  if (txtr == NULL) {
     printf("[ERROR] Err creating SDL Surface in new_r_text: %s\n",
-           TTF_GetError());
+           SDL_GetError());
     free(ret);
     return NULL;
   }
-  ret->text_surface = srfc;
+  ret->texture = txtr;
 
   return ret;
 }
@@ -89,7 +89,7 @@ SDL_Texture* create_text_texture(SDL_Renderer* renderer, R_Text* text,
 // Function fails if text_length > r_text capacity. On fail, NULL is returned,
 // but the R_Text* output parameter is not modified.
 // This function is unsafe to call with NULL text or text_buffer.
-// [TODO] Update surface
+// [TODO] Update texture
 char* change_text(R_Text* text, const char* text_buffer, size_t text_length) {
   if (text_length > text->text_capacity) {
     printf("[ERROR] Changing text with one exceeding max capacity\n");
@@ -102,20 +102,13 @@ char* change_text(R_Text* text, const char* text_buffer, size_t text_length) {
   return text->text_buffer;
 }
 
-void r_render_text_blit(SDL_Surface* window_surface, const R_Text* text,
-                        const int x, const int y) {
-  SDL_Rect dest_rect = {
-      .h = text->text_surface->h, .w = text->text_surface->w, .x = x, .y = y};
-  SDL_BlitSurface(text->text_surface, NULL, window_surface, &dest_rect);
-}
-
 // [TODO] Text seems to destroy font, but should it actually own it?
-void destroy_text(R_Text* text) {
+void r_destroy_text(R_Text* text) {
   if (text != NULL) {
     if (text->text_buffer != NULL) {
       free(text->text_buffer);
     }
-    SDL_FreeSurface(text->text_surface);
+    SDL_DestroyTexture(text->texture);
 
     free(text);
   }

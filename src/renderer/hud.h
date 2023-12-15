@@ -5,21 +5,18 @@
 #include "../f_timer.h"
 #include "../player.h"
 #include "font.h"
+#include "text.h"
 
 // [TODO] I don't like three variables texture/wid/hei - those should be in one
 // struct, possibly even within R_Text.
 typedef struct {
-  SDL_Texture* score_txtr;
-  int score_txtr_wid;
-  int score_txtr_hei;
+  R_Text* score_text;
   const R_Font* hud_font;
   const FontStorage* font_storage;
   const F_Timer* f_timer;
   int fps_tick_timer;
   int fps_ticks_to_render;
-  SDL_Texture* fps_txtr;
-  int fps_txtr_wid;
-  int fps_txtr_hei;
+  R_Text* fps_text;
 
   int player_score;  // [TODO] Become array once there are multiple players
   // Not owned
