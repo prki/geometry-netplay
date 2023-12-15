@@ -8,7 +8,7 @@
 
 // [TODO] To consider bullet velocity to be a member variable of e.g.
 // gun/powerup/player
-#define BULLET_VELOCITY 16
+#define BULLET_VELOCITY 1200
 #define BULLET_WIDTH 4
 #define BULLET_HEIGHT 24
 
@@ -30,7 +30,7 @@ void initialize_bullet(Bullet* bullet) {
   disable_bullet(bullet);
 }
 
-void update_bullet(Bullet* bullet) {
+void update_bullet(Bullet* bullet, double delta_time) {
   if (bullet == NULL) {
     printf("[WARN] update_bullet() with NULL passed\n");
     return;
@@ -41,8 +41,9 @@ void update_bullet(Bullet* bullet) {
   }
 
   vec2d direction = vec2d_normalize(&bullet->direction);
-  vec2d trnsl_magnitude = (vec2d){.x = direction.x * bullet->velocity,
-                                  .y = direction.y * bullet->velocity};
+  vec2d trnsl_magnitude =
+      (vec2d){.x = direction.x * bullet->velocity * delta_time,
+              .y = direction.y * bullet->velocity * delta_time};
 
   translate_rectangle(&bullet->hitbox, trnsl_magnitude);
 }

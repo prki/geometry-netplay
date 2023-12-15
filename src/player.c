@@ -8,7 +8,7 @@
 #include "math/shapes.h"
 #include "math/vector.h"
 
-#define PLAYER_VELOCITY 5
+#define PLAYER_VELOCITY 400
 
 Player* new_player(vec2d ship_position, double hurtcirc_radius,
                    size_t ship_width, vec2d shoot_direction) {
@@ -24,7 +24,7 @@ Player* new_player(vec2d ship_position, double hurtcirc_radius,
       create_ship(ship_position, ship_width, hurtcirc_radius, NULL, NULL, NULL);
   plr->shoot_direction = shoot_direction;
   plr->shoot_timer = 0;
-  plr->shoot_interval = 6;
+  plr->shoot_interval = 70;
   plr->movement_direction = (vec2d){.x = 0, .y = 0};
   plr->score = 0;
 
@@ -37,13 +37,18 @@ void destroy_player(Player* plr) {
   }
 }
 
-void update_shoot_timer(Player* plr) {
-  if (plr->shoot_timer != 0) {
-    plr->shoot_timer++;
+int update_shoot_timer(Player* plr, double delta_time) {
+  int should_shoot = 0;
+  if (plr->shoot_timer >= plr->shoot_interval) {
+    should_shoot = 1;
   }
-  if (plr->shoot_timer == plr->shoot_interval) {
-    plr->shoot_timer = 0;
+  if (should_shoot) {
+    plr->shoot_timer = plr->shoot_timer - plr->shoot_interval;
+  } else {
+    plr->shoot_timer += delta_time * 1000;  // to ms
   }
+
+  return should_shoot;
 }
 
 // Function calculating the initial position of a bullet shot, i.e. where it
@@ -75,9 +80,9 @@ vec2d calc_bullet_start(const Player* plr, const Bullet* bullet) {
   return pos_topleft;
 }
 
-void shoot_bullet(Player* plr, BulletPool* bullet_pool) {
-  update_shoot_timer(plr);
-  if (plr->shoot_timer != 0) {
+void shoot_bullet(Player* plr, BulletPool* bullet_pool, double delta_time) {
+  int should_shoot = update_shoot_timer(plr, delta_time);
+  if (!should_shoot) {
     return;
   }
 
@@ -106,7 +111,7 @@ void shoot_bullet(Player* plr, BulletPool* bullet_pool) {
   plr->shoot_timer++;
 }
 
-void update_player(Player* plr, BulletPool* bullet_pool) {
+void update_player(Player* plr, BulletPool* bullet_pool, double delta_time) {
   const Uint8* keystate = SDL_GetKeyboardState(NULL);
   vec2d movement = {.x = 0.0, .y = 0.0};
   vec2d new_direction = {.x = 0.0, .y = 0.0};
@@ -144,13 +149,13 @@ void update_player(Player* plr, BulletPool* bullet_pool) {
   }
   plr->movement_direction = movement;
 
-  vec2d trnsl_magnitude = {.x = movement.x * PLAYER_VELOCITY,
-                           .y = movement.y * PLAYER_VELOCITY};
+  vec2d trnsl_magnitude = {.x = movement.x * PLAYER_VELOCITY * delta_time,
+                           .y = movement.y * PLAYER_VELOCITY * delta_time};
 
   update_ship(&plr->player_ship, trnsl_magnitude);
-  shoot_bullet(plr, bullet_pool);
+  shoot_bullet(plr, bullet_pool, delta_time);
 }
 
-void update_player_ai(Player* plr, BulletPool* bullet_pool) {
-  shoot_bullet(plr, bullet_pool);
+void update_player_ai(Player* plr, BulletPool* bullet_pool, double delta_time) {
+  shoot_bullet(plr, bullet_pool, delta_time);
 }

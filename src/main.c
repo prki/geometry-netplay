@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <math.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -8,6 +9,20 @@
 #include "g_session_manager.h"
 #include "game.h"
 #include "renderer/renderer_manager.h"
+
+// This game has been programmed to assume VSYNC is on - however, physics
+// and rendering are calculated using elapsed delta times. As such, it is
+// possible to unlock the framerate. HOWEVER, the calculation is not precise
+// in any way - the calculation uses SDL_Delay() to sleep the elapsed time
+// until a new frame may start. This is hardly ideal as SDL_Delay() uses OS
+// sleep AND the precision goes up to miliseconds (hence anything above 1000FPS
+// would never be seen). In order to do this more precisely, OS-level timer
+// would need to be introduced (see c++ std::chrono).
+// Hence, these switches serve to provide testing of framerate-independency
+// with different monitors (60/144/...Hz), but at the end of the day, they
+// should be compiled to run with VSYNC ON.
+#define VSYNC_ON 0
+#define MAX_FPS 200
 
 /* [TODO] [BUG] If window succeeds but renderer does not, no sign
  * which to destroy*/
@@ -20,8 +35,11 @@ int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer) {
     return 0;
   }
 
-  *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_PRESENTVSYNC);
-  //*renderer = SDL_CreateRenderer(*window, -1, 0);
+  if (VSYNC_ON) {
+    *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_PRESENTVSYNC);
+  } else {
+    *renderer = SDL_CreateRenderer(*window, -1, 0);
+  }
   if (*renderer == NULL) {
     printf("[ERROR] Error creating renderer: %s\n", SDL_GetError());
     return 0;
@@ -164,16 +182,24 @@ int main(void) {
 
   int keep_running = 1;
   SDL_Event evt;
+  float max_delta = (1.0 / MAX_FPS) * 1000.0;
   while (keep_running) {
+    Uint64 start_time = SDL_GetPerformanceCounter();
     while (SDL_PollEvent(&evt)) {
       if (evt.type == SDL_QUIT) {
         keep_running = 0;
       }
     }
     f_timer_update(&f_timer);
-    game_update(game);
-
-    render_frame(r_mngr);
+    double game_delta = f_timer.delta_time / 1000.0f;
+    game_update(game, game_delta);
+    render_frame(r_mngr, game_delta);
+    Uint64 end_time = SDL_GetPerformanceCounter();
+    if (!VSYNC_ON) {
+      float elapsedMs = (end_time - start_time) /
+                        (float)SDL_GetPerformanceFrequency() * 1000.0f;
+      SDL_Delay(floor(max_delta - elapsedMs));
+    }
   }
 
   destroy_game(game);

@@ -12,9 +12,9 @@
 #include "particle.h"
 
 // [TODO] We probably want to move these to particle.[c|h]
-#define MAX_PARTICLE_VELOCITY 4
-#define MAX_PARTICLE_DECAY_RATE 20
-#define MIN_PARTICLE_DECAY_RATE 5
+#define MAX_PARTICLE_VELOCITY 200
+#define MAX_PARTICLE_ADD_TIME_TO_LIVE 400
+#define MIN_PARTICLE_ADD_TIME_TO_LIVE 5
 #define MAX_FONTSTORAGE 16
 
 void _nullify_renderable_players(RendererManager* r_mngr) {
@@ -362,7 +362,8 @@ void render_bullets(RendererManager* r_mngr) {
 // => that way, it will be possible to make a half circle, rather than all
 // particles. But let's first generate around a circle and see how it looks
 // around edges - it might also be worth it to introduce collision detection.
-void _generate_particle(ParticlePool* particle_pool, const vec2d impact_point) {
+void _generate_particle(ParticlePool* particle_pool, const vec2d impact_point,
+                        double delta_time) {
   Particle* particle = get_inactive_particle(particle_pool);
   if (particle == NULL) {
     printf("[WARN] Particle pool full, could not get inactive particle\n");
@@ -381,17 +382,21 @@ void _generate_particle(ParticlePool* particle_pool, const vec2d impact_point) {
   double particle_velocity =
       ((double)rand() / RAND_MAX) * MAX_PARTICLE_VELOCITY;
 
-  particle->velocity = particle_velocity;
+  particle->velocity = particle_velocity * delta_time;
   particle->direction = initial_direction;
   enable_particle(particle);
-  particle->decay_rate =
-      MIN_PARTICLE_DECAY_RATE +
-      (rand() % (MAX_PARTICLE_DECAY_RATE - MIN_PARTICLE_DECAY_RATE));
-  if (particle->decay_rate <= 0) {
-    printf("[WARN] Decay rate 0 generated!\n");
-  }
-  // adding decay_rate as update is called then which decreases alpha
-  particle->alpha = 255 + particle->decay_rate;
+  particle->time_to_live = PARTICLE_TIME_TO_LIVE;
+  double decay_rate = MIN_PARTICLE_ADD_TIME_TO_LIVE +
+                      (rand() % (MAX_PARTICLE_ADD_TIME_TO_LIVE -
+                                 MIN_PARTICLE_ADD_TIME_TO_LIVE));
+  particle->time_to_live += decay_rate;
+  particle->time_alive = 0;
+  // printf("Generated particle with decay rate: %f\n", particle->decay_rate);
+  // if (particle->decay_rate <= 0) {
+  //   printf("[WARN] Decay rate 0 generated!\n");
+  // }
+  //  adding decay_rate as update is called then which decreases alpha
+  // particle->alpha = 255 + particle->decay_rate;
   particle->position = initial_position;
 }
 
@@ -407,7 +412,7 @@ void render_particles(RendererManager* r_mngr) {
   }
 }
 
-void render_frame(RendererManager* r_mngr) {
+void render_frame(RendererManager* r_mngr, double delta_time) {
   // background clear
   // SDL_SetRenderDrawColor(r_mngr->renderer, 60, 60, 60, 255);
   SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
@@ -428,14 +433,15 @@ void render_frame(RendererManager* r_mngr) {
     } else if (evt->type == BULLET_IMPACT) {
       BulletImpactData* impact_data = (BulletImpactData*)(evt->data);
       for (size_t i = 0; i < 100; i++) {
-        _generate_particle(r_mngr->particle_pool, impact_data->impact_point);
+        _generate_particle(r_mngr->particle_pool, impact_data->impact_point,
+                           delta_time);
       }
     }
     destroy_game_event(evt);
   }
 
   render_bullets(r_mngr);
-  update_particles(r_mngr->particle_pool);
+  update_particles(r_mngr->particle_pool, delta_time);
   render_particles(r_mngr);
   r_update_hud(r_mngr->hud, r_mngr->renderer);
   r_render_hud(r_mngr->hud, r_mngr->renderer);

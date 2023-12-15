@@ -16,11 +16,11 @@ void initialize_particle(Particle* particle) {
   particle->direction = (vec2d){.x = NAN, .y = NAN};
   particle->velocity = NAN;
   particle->is_active = 0;
-  particle->decay_rate = 0;
-  particle->alpha = 0;
+  particle->time_to_live = 0;
+  particle->time_alive = 0;
 }
 
-void update_particle(Particle* particle) {
+void update_particle(Particle* particle, double delta_time) {
   if (particle->is_active == 0) {
     return;
   }
@@ -28,8 +28,8 @@ void update_particle(Particle* particle) {
   particle->position = (vec2d){
       .x = particle->position.x + particle->direction.x * particle->velocity,
       .y = particle->position.y + particle->direction.y * particle->velocity};
-  particle->alpha -= particle->decay_rate;
-  if (particle->alpha <= 0) {
+  particle->time_alive += delta_time * 1000.0;
+  if (particle->time_alive >= particle->time_to_live) {
     disable_particle(particle);
   }
 }
@@ -87,8 +87,8 @@ Particle* get_inactive_particle(ParticlePool* pool) {
   return NULL;
 }
 
-void update_particles(ParticlePool* pool) {
+void update_particles(ParticlePool* pool, double delta_time) {
   for (size_t i = 0; i < pool->pool_size; i++) {
-    update_particle(&pool->particles[i]);
+    update_particle(&pool->particles[i], delta_time);
   }
 }

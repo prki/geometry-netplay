@@ -208,14 +208,15 @@ void collide_player_rectangles(Game* game) {
   }
 }
 
-void update_players(Game* game) {
+void update_players(Game* game, double delta_time) {
   // for player in players
-  update_player(game->player, game->bullet_pool);
+  update_player(game->player, game->bullet_pool, delta_time);
   // [TODO] Game should have a counter of AI players added so that this loop
   // is not iterating unnecessarily
   for (size_t i = 0; i < MAX_AI_PLAYERS; i++) {
     if (game->enemy_players_ai[i] != NULL) {
-      update_player_ai(game->enemy_players_ai[i], game->bullet_pool);
+      update_player_ai(game->enemy_players_ai[i], game->bullet_pool,
+                       delta_time);
     }
   }
   collide_player_rectangles(game);
@@ -282,11 +283,11 @@ void handle_player_death(Game* game, Player* player, Bullet* bullet) {
   relocate_ship(&player->player_ship, spawn_point);
 }
 
-void update_bullets(Game* game) {
+void update_bullets(Game* game, double delta_time) {
   for (size_t i = 0; i < game->bullet_pool->pool_size; i++) {
     Bullet* curr_bullet = &game->bullet_pool->bullets[i];
     if (curr_bullet->is_active) {
-      update_bullet(curr_bullet);
+      update_bullet(curr_bullet, delta_time);
       const Rectangle* colliding_rect =
           collide_bullet_gameworld(game->game_world, curr_bullet);
       if (colliding_rect != NULL) {
@@ -304,7 +305,7 @@ void update_bullets(Game* game) {
   }
 }
 
-void game_update(Game* game) {
-  update_players(game);
-  update_bullets(game);
+void game_update(Game* game, double delta_time) {
+  update_players(game, delta_time);
+  update_bullets(game, delta_time);
 }
