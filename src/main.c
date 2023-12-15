@@ -163,12 +163,16 @@ int main(void) {
 
   // [TODO] Shouldn't this also clean up game resources and such? (the if
   // branch)
-  succ =
-      r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player, &f_timer);
-  if (!succ) {
-    SDL_Quit();
-    return 1;
-  }
+  // succ =
+  //    r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player, &f_timer);
+  // if (!succ) {
+  //  SDL_Quit();
+  //  return 1;
+  //}
+
+  G_Session_Manager g_sess_mgr;
+  initialize_game_session(&g_sess_mgr, game, r_mngr);
+  setup_game_session(&g_sess_mgr, G_GAMETYPE_LOCAL_MULTIPLAYER);
 
   succ = register_game(r_mngr, game);
   if (!succ) {
@@ -176,9 +180,14 @@ int main(void) {
     return 1;
   }
 
-  G_Session_Manager g_sess_mgr;
-  initialize_game_session(&g_sess_mgr, game, r_mngr);
-  add_ai_player_to_session(&g_sess_mgr);
+  // add_ai_player_to_session(&g_sess_mgr);
+
+  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->players[0],
+                          &f_timer);
+  if (!succ) {
+    SDL_Quit();
+    return 1;
+  }
 
   int keep_running = 1;
   SDL_Event evt;

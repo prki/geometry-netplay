@@ -199,10 +199,15 @@ int register_event_queue(RendererManager* r_mngr, GameEventQueue* queue) {
 
 int register_game(RendererManager* r_mngr, Game* game) {
   int succ = 0;
-  succ = register_player(r_mngr, game->player);
-  if (!succ) {
-    printf("[ERROR] Error registering player into renderer manager\n");
-    return 0;
+
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    if (game->players[i] != NULL) {
+      succ = register_player(r_mngr, game->players[i]);
+      if (!succ) {
+        printf("[ERROR] Error registering player into renderer manager\n");
+        return 0;
+      }
+    }
   }
 
   succ = register_game_world(r_mngr, game->game_world);
@@ -225,23 +230,6 @@ int register_game(RendererManager* r_mngr, Game* game) {
 
   return 1;
 }
-
-// Debug function drawing a line from player to display direction.
-// Direction vector will be used to shoot bullets
-// [TODO] Delete me once confident this is not needed at all
-/*void draw_player_direction_line(RendererManager* r_mngr) {
-  int x1, y1, x2, y2;
-  int line_length = 20;
-
-  x1 = r_mngr->renderable_player.player->player_ship.collision_circ.position.x;
-  y1 = r_mngr->renderable_player.player->player_ship.collision_circ.position.y;
-  x2 = x1 + (r_mngr->renderable_player.player->shoot_direction.x * line_length);
-  y2 = y1 + (r_mngr->renderable_player.player->shoot_direction.y * line_length);
-
-  SDL_SetRenderDrawColor(r_mngr->renderer, 255, 0, 0, 255);
-  SDL_RenderDrawLine(r_mngr->renderer, x1, y1, x2, y2);
-}
-*/
 
 /* [TODO] Validate SDL_RenderCopy return code*/
 void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr) {

@@ -5,18 +5,42 @@
 #include <stdlib.h>
 
 #include "SDL_keyboard.h"
+#include "f_controls.h"
 #include "math/shapes.h"
 #include "math/vector.h"
 
 #define PLAYER_VELOCITY 400
 
-Player* new_player(vec2d ship_position, double hurtcirc_radius,
-                   size_t ship_width, vec2d shoot_direction) {
+Player* new_pc_player(vec2d ship_position, double hurtcirc_radius,
+                      size_t ship_width, vec2d shoot_direction,
+                      F_Controls controls) {
   Player* plr = NULL;
 
   plr = malloc(sizeof(Player));
   if (plr == NULL) {
     printf("[ERROR] Error allocating player struct\n");
+    return NULL;
+  }
+
+  plr->player_ship =
+      create_ship(ship_position, ship_width, hurtcirc_radius, NULL, NULL, NULL);
+  plr->shoot_direction = shoot_direction;
+  plr->shoot_timer = 0;
+  plr->shoot_interval = 70;
+  plr->movement_direction = (vec2d){.x = 0, .y = 0};
+  plr->score = 0;
+  plr->f_controls = controls;
+
+  return plr;
+}
+
+Player* new_ai_player(vec2d ship_position, double hurtcirc_radius,
+                      size_t ship_width, vec2d shoot_direction) {
+  Player* plr = NULL;
+
+  plr = malloc(sizeof(Player));
+  if (plr == NULL) {
+    printf("[ERROR] malloc error new ai player\n");
     return NULL;
   }
 
@@ -114,38 +138,37 @@ void shoot_bullet(Player* plr, BulletPool* bullet_pool, double delta_time) {
 void update_player(Player* plr, BulletPool* bullet_pool, double delta_time) {
   const Uint8* keystate = SDL_GetKeyboardState(NULL);
   vec2d movement = {.x = 0.0, .y = 0.0};
-  vec2d new_direction = {.x = 0.0, .y = 0.0};
-
-  if (keystate[SDL_SCANCODE_D]) {
+  vec2d shoot_direction = {.x = 0.0, .y = 0.0};
+  if (keystate[plr->f_controls.move_right]) {
     movement.x += 1.0;
   }
-  if (keystate[SDL_SCANCODE_A]) {
+  if (keystate[plr->f_controls.move_left]) {
     movement.x -= 1.0;
   }
-  if (keystate[SDL_SCANCODE_W]) {
-    movement.y -= 1.0;
-  }
-  if (keystate[SDL_SCANCODE_S]) {
+  if (keystate[plr->f_controls.move_down]) {
     movement.y += 1.0;
   }
-  if (keystate[SDL_SCANCODE_J]) {
-    new_direction.x -= 1.0;
+  if (keystate[plr->f_controls.move_up]) {
+    movement.y -= 1.0;
   }
-  if (keystate[SDL_SCANCODE_K]) {
-    new_direction.y += 1.0;
+  if (keystate[plr->f_controls.shoot_right]) {
+    shoot_direction.x += 1.0;
   }
-  if (keystate[SDL_SCANCODE_L]) {
-    new_direction.x += 1.0;
+  if (keystate[plr->f_controls.shoot_left]) {
+    shoot_direction.x -= 1.0;
   }
-  if (keystate[SDL_SCANCODE_I]) {
-    new_direction.y -= 1.0;
+  if (keystate[plr->f_controls.shoot_down]) {
+    shoot_direction.y += 1.0;
+  }
+  if (keystate[plr->f_controls.shoot_up]) {
+    shoot_direction.y -= 1.0;
   }
 
   if (movement.x != 0.0 && movement.y != 0.0) {
     movement = vec2d_normalize(&movement);
   }
-  if (new_direction.x != 0.0 || new_direction.y != 0.0) {
-    plr->shoot_direction = vec2d_normalize(&new_direction);
+  if (shoot_direction.x != 0.0 || shoot_direction.y != 0.0) {
+    plr->shoot_direction = vec2d_normalize(&shoot_direction);
   }
   plr->movement_direction = movement;
 

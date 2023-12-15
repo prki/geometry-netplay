@@ -11,8 +11,10 @@
 // [TODO] Figure out initialization/destruction pattern to prevent
 // growth of continuous malloc/free tree
 void _deinitialize_game(Game* game) {
-  if (game->player != NULL) {
-    destroy_player(game->player);
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    if (game->players[i] != NULL) {
+      destroy_player(game->players[i]);
+    }
   }
   if (game->game_world != NULL) {
     destroy_game_world(game->game_world);
@@ -26,7 +28,8 @@ void _deinitialize_game(Game* game) {
   free(game);
 }
 
-Player* _initialize_pc_player(void) {
+// [TODO] DELME once moved to g_sess_mgr
+/*Player* _initialize_pc_player(void) {
   vec2d initial_ship_position = {.x = 600, .y = 600};
   double hurtcirc_radius = 8;
   size_t ship_width = 32;
@@ -35,6 +38,7 @@ Player* _initialize_pc_player(void) {
   return new_player(initial_ship_position, hurtcirc_radius, ship_width,
                     shoot_direction);
 }
+*/
 
 void _initialize_spawn_points(Game* game) {
   game->spawn_points[0] = (vec2d){.x = 800, .y = 800};
@@ -56,19 +60,22 @@ Game* initialize_game(void) {
     return NULL;
   }
 
-  game->player = NULL;
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    game->players[i] = NULL;
+  }
   game->game_world = NULL;
   game->evt_queue = NULL;
   game->bullet_pool = NULL;
 
   _initialize_spawn_points(game);
 
-  Player* player = _initialize_pc_player();
+  /*Player* player = _initialize_pc_player();
   if (player == NULL) {
     printf("[ERROR] Error initializing game while initializing player\n");
     _deinitialize_game(game);
     return NULL;
   }
+  */
 
   GameWorld* game_world = new_game_world();
   if (game_world == NULL) {
@@ -86,7 +93,7 @@ Game* initialize_game(void) {
 
   BulletPool* bullet_pool = new_bullet_pool();
 
-  game->player = player;
+  // game->player = player;
   game->game_world = game_world;
   game->evt_queue = queue;
   game->bullet_pool = bullet_pool;
@@ -112,7 +119,8 @@ Player* add_enemy_player_ai(Game* game, const vec2d* ship_position,
         spawn_pos = *ship_position;
       }
 
-      tmp = new_player(spawn_pos, hurtcirc_radius, ship_width, shoot_direction);
+      tmp = new_ai_player(spawn_pos, hurtcirc_radius, ship_width,
+                          shoot_direction);
       if (tmp == NULL) {
         printf("[ERROR] new player failed when adding enemy player\n");
         return NULL;
@@ -129,7 +137,11 @@ Player* add_enemy_player_ai(Game* game, const vec2d* ship_position,
 
 void destroy_game(Game* game) {
   if (game != NULL) {
-    destroy_player(game->player);
+    for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+      if (game->players[i] != NULL) {
+        destroy_player(game->players[i]);
+      }
+    }
     destroy_game_world(game->game_world);
     destroy_game_event_queue(game->evt_queue);
     destroy_bullet_pool(game->bullet_pool);
@@ -199,18 +211,29 @@ void correct_player_coords(Player* plr, const Rectangle* rect) {
 }
 
 void collide_player_rectangles(Game* game) {
-  for (unsigned int i = 0; i < game->game_world->rects->size; i++) {
-    Rectangle curr_rect = game->game_world->rects->array[i];
-    if (circle_rectangle_intersection(&game->player->player_ship.collision_circ,
-                                      &curr_rect)) {
-      correct_player_coords(game->player, &curr_rect);
+  for (size_t j = 0; j < G_MAX_PC_PLAYERS; j++) {
+    Player* player = game->players[j];
+    if (player == NULL) {
+      continue;
+    }
+    for (unsigned int i = 0; i < game->game_world->rects->size; i++) {
+      Rectangle curr_rect = game->game_world->rects->array[i];
+      if (circle_rectangle_intersection(&player->player_ship.collision_circ,
+                                        &curr_rect)) {
+        correct_player_coords(player, &curr_rect);
+      }
     }
   }
 }
 
 void update_players(Game* game, double delta_time) {
   // for player in players
-  update_player(game->player, game->bullet_pool, delta_time);
+  // update_player(game->player, game->bullet_pool, delta_time);
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    if (game->players[i] != NULL) {
+      update_player(game->players[i], game->bullet_pool, delta_time);
+    }
+  }
   // [TODO] Game should have a counter of AI players added so that this loop
   // is not iterating unnecessarily
   for (size_t i = 0; i < MAX_AI_PLAYERS; i++) {

@@ -43,6 +43,7 @@ add_executable(geometry-netplay
   src/ship.c
   src/g_session_manager.c
   src/f_timer.c
+  src/f_controls.c
   src/math/vector.c
   src/math/trigonometry.c
   src/math/shapes.c
