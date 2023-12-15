@@ -56,6 +56,6 @@ void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr);
 void draw_rectangle_outline(RendererManager* r_mngr, const Rectangle* rect);
 int r_load_assets_fonts(RendererManager* r_mngr);
 
-void render_frame(RendererManager* r_mngr);
+void render_frame(RendererManager* r_mngr, double delta_time);
 
 #endif  // _RENDERER_MANAGER_H

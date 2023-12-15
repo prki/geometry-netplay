@@ -4,7 +4,7 @@
 #include "math/shapes.h"
 struct Player;  // forward declaration due to bullet/player circular dependency
 
-typedef struct Bullet {
+typedef struct {
   Rectangle hitbox;
   vec2d direction;
   double velocity;
@@ -15,7 +15,7 @@ typedef struct Bullet {
 void disable_bullet(Bullet* bullet);
 void enable_bullet(Bullet* bullet);
 void initialize_bullet(Bullet* bullet);
-void update_bullet(Bullet* bullet);
+void update_bullet(Bullet* bullet, double delta_time);
 void initialize_bullet_shot(Bullet* bullet, const vec2d direction,
                             const vec2d position, struct Player* bullet_owner);
 

@@ -21,7 +21,7 @@ typedef struct Game {
 
 Game* initialize_game(void);
 void destroy_game(Game* game);
-void game_update(Game* game);
+void game_update(Game* game, double delta_time);
 Player* add_enemy_player_ai(Game* game, const vec2d* ship_position,
                             double hurtcirc_radius, size_t ship_width,
                             vec2d shoot_direction);
