@@ -1,7 +1,11 @@
 #include "g_session_manager.h"
 
+#include <SDL.h>
+#include <math.h>
 #include <stdio.h>
 
+#include "SDL_timer.h"
+#include "f_config.h"
 #include "f_controls.h"
 #include "game.h"
 #include "math/vector.h"
@@ -18,8 +22,10 @@ void initialize_game_session(G_Session_Manager* g_sess_mgr, Game* game,
     return;
   }
 
+  f_timer_init(&g_sess_mgr->f_timer);
   g_sess_mgr->game = game;
   g_sess_mgr->r_mngr = r_mngr;
+  g_sess_mgr->g_rules.timelimit = 0;
 }
 
 void add_ai_player_to_session(G_Session_Manager* g_sess_mgr) {
@@ -59,6 +65,16 @@ int _setup_local_multiplayer(G_Session_Manager* g_sess_mgr) {
   g_sess_mgr->game->players[0] = p1;
   g_sess_mgr->game->players[1] = p2;
 
+  int succ = r_initialize_hud(
+      g_sess_mgr->r_mngr->hud, g_sess_mgr->r_mngr->renderer,
+      (const Player**)g_sess_mgr->game->players, &g_sess_mgr->f_timer);
+  if (!succ) {
+    printf(
+        "[ERROR] Error setting up local multiplayer - HUD initialization "
+        "failure\n");
+    return 0;
+  }
+
   return 1;
 }
 
@@ -81,7 +97,9 @@ int _setup_local_singleplayer(G_Session_Manager* g_sess_mgr) {
 }
 
 // Possible gametypes - G_GAMETYPE_* - see g_session_manager.h.
-int setup_game_session(G_Session_Manager* g_sess_mgr, int gametype) {
+// In case no timelimit should be set, use 0.
+int setup_game_session(G_Session_Manager* g_sess_mgr, int gametype,
+                       unsigned int timelimit) {
   int succ = 1;
   if (gametype == G_GAMETYPE_LOCAL_MULTIPLAYER) {
     succ = _setup_local_multiplayer(g_sess_mgr);
@@ -92,5 +110,64 @@ int setup_game_session(G_Session_Manager* g_sess_mgr, int gametype) {
     succ = 0;
   }
 
+  g_sess_mgr->g_rules.timelimit = timelimit;
+
   return succ;
+}
+
+int is_game_over(G_Game_Rules g_rules, G_Rule_Checker g_rule_checker) {
+  if (g_rules.timelimit != 0) {
+    double time_elapsed_secs = g_rule_checker.time_elapsed / 1000.0f;
+    if (time_elapsed_secs >= g_rules.timelimit) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+// Function running the main game loop - updating the game each tick and
+// rendering it each tick. In essence, this is the standard "game loop wrapper"
+// common in the main() function. Note that this function is blocking - once
+// it's called, it will run until the window is either closed or the game is
+// finished based on its set rules.
+// [TODO] Implement enum/defines with return codes (e.g. game quit, game over ->
+// show result screen, ...)
+int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
+  int keep_running = 1;
+  SDL_Event evt;
+  float max_delta = (1.0 / f_cfg->r_max_fps) * 1000.0;
+  g_sess_mgr->g_rule_checker.time_elapsed = 0;
+  while (keep_running) {
+    Uint64 start_time = SDL_GetPerformanceCounter();
+    if (is_game_over(g_sess_mgr->g_rules, g_sess_mgr->g_rule_checker)) {
+      printf("[G_SESS_MGR] Game is over based on rules\n");
+    }
+
+    while (SDL_PollEvent(&evt)) {
+      if (evt.type == SDL_QUIT) {
+        keep_running = 0;
+      }
+    }
+
+    f_timer_update(&g_sess_mgr->f_timer);
+    g_sess_mgr->g_rule_checker.time_elapsed += g_sess_mgr->f_timer.delta_time;
+    double game_delta = g_sess_mgr->f_timer.delta_time / 1000.0f;
+
+    game_update(g_sess_mgr->game, game_delta);
+    render_frame(g_sess_mgr->r_mngr, game_delta);
+    r_update_hud(g_sess_mgr->r_mngr->hud, g_sess_mgr->r_mngr->renderer);
+    r_render_hud(g_sess_mgr->r_mngr->hud, g_sess_mgr->r_mngr->renderer,
+                 g_sess_mgr->g_rule_checker.time_elapsed);
+    r_display_frame(g_sess_mgr->r_mngr);
+
+    Uint64 end_time = SDL_GetPerformanceCounter();
+    if (!f_cfg->r_vsync) {
+      float elapsed_ms = (end_time - start_time) /
+                         (float)SDL_GetPerformanceFrequency() * 1000.0f;
+      SDL_Delay(floor(max_delta - elapsed_ms));
+    }
+  }
+
+  return 1;
 }

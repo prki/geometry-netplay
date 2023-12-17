@@ -38,7 +38,8 @@ R_HUD* new_r_hud(const FontStorage* font_storage);
 int r_initialize_hud(R_HUD* r_hud, SDL_Renderer* renderer,
                      const Player* players[], const F_Timer* f_timer);
 int r_update_hud(R_HUD* r_hud, SDL_Renderer* renderer);
-void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer);
+void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer,
+                  unsigned int time_elapsed);
 void destroy_r_hud(R_HUD* r_hud);
 
 #endif  // _HUD_H_
