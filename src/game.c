@@ -69,14 +69,6 @@ Game* initialize_game(void) {
 
   _initialize_spawn_points(game);
 
-  /*Player* player = _initialize_pc_player();
-  if (player == NULL) {
-    printf("[ERROR] Error initializing game while initializing player\n");
-    _deinitialize_game(game);
-    return NULL;
-  }
-  */
-
   GameWorld* game_world = new_game_world();
   if (game_world == NULL) {
     printf("[ERROR] Error initializing game while initializing gameworld\n");
@@ -227,8 +219,6 @@ void collide_player_rectangles(Game* game) {
 }
 
 void update_players(Game* game, double delta_time) {
-  // for player in players
-  // update_player(game->player, game->bullet_pool, delta_time);
   for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
     if (game->players[i] != NULL) {
       update_player(game->players[i], game->bullet_pool, delta_time);
@@ -275,7 +265,22 @@ void _create_bullet_impact_event(Game* game, const Bullet* bullet,
   evt_queue_enqueue(game->evt_queue, evt);
 }
 
+// Function colliding a bullet with all available players in the game.
+// In case a bullet is colliding with any player (player is being hit), pointer
+// to said player is returned.
+// In case of no collision, NULL is returned.
 Player* collide_bullet_players(const Bullet* bullet, const Game* game) {
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    if (game->players[i] != NULL) {
+      Player* curr_player = game->players[i];
+      if (circle_rectangle_intersection(&curr_player->player_ship.hurtcirc,
+                                        &bullet->hitbox)) {
+        if (bullet->owner != curr_player) {
+          return curr_player;
+        }
+      }
+    }
+  }
   // [TODO] Implement so that AI players are traversed only if active, not all
   for (size_t i = 0; i < MAX_AI_PLAYERS; i++) {
     if (game->enemy_players_ai[i] != NULL) {
@@ -291,7 +296,6 @@ Player* collide_bullet_players(const Bullet* bullet, const Game* game) {
 }
 
 // [TODO] Player respawn should not lead to telefrag
-// [TODO] Iterate score of bullet owner
 void handle_player_death(Game* game, Player* player, Bullet* bullet) {
   disable_bullet(bullet);
   vec2d spawn_point = get_random_spawnpoint(game);

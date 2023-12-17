@@ -35,7 +35,7 @@ void update_particle(Particle* particle, double delta_time) {
 }
 
 ParticlePool* new_particle_pool(void) {
-  size_t pool_size = 3000;
+  size_t pool_size = 5000;
 
   Particle* particles = malloc(pool_size * sizeof(Particle));
   if (particles == NULL) {
