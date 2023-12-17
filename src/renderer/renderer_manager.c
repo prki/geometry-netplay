@@ -379,12 +379,6 @@ void _generate_particle(ParticlePool* particle_pool, const vec2d impact_point,
                                  MIN_PARTICLE_ADD_TIME_TO_LIVE));
   particle->time_to_live += decay_rate;
   particle->time_alive = 0;
-  // printf("Generated particle with decay rate: %f\n", particle->decay_rate);
-  // if (particle->decay_rate <= 0) {
-  //   printf("[WARN] Decay rate 0 generated!\n");
-  // }
-  //  adding decay_rate as update is called then which decreases alpha
-  // particle->alpha = 255 + particle->decay_rate;
   particle->position = initial_position;
 }
 
@@ -400,9 +394,12 @@ void render_particles(RendererManager* r_mngr) {
   }
 }
 
+// Function rendering all game-related elements into the SDL renderer.
+// Note that it does not call SDL_RenderPresent() as there may be post-rendering
+// activities to perform, such as rendering scoreboards or anything else
+// (considered "metadata"). r_display_frame() should be called once the frame
+// should be rendered in its entirety.
 void render_frame(RendererManager* r_mngr, double delta_time) {
-  // background clear
-  // SDL_SetRenderDrawColor(r_mngr->renderer, 60, 60, 60, 255);
   SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
   SDL_RenderClear(r_mngr->renderer);
 
@@ -431,8 +428,8 @@ void render_frame(RendererManager* r_mngr, double delta_time) {
   render_bullets(r_mngr);
   update_particles(r_mngr->particle_pool, delta_time);
   render_particles(r_mngr);
-  r_update_hud(r_mngr->hud, r_mngr->renderer);
-  r_render_hud(r_mngr->hud, r_mngr->renderer);
+}
 
+void r_display_frame(RendererManager* r_mngr) {
   SDL_RenderPresent(r_mngr->renderer);
 }

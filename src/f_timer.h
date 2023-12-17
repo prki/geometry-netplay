@@ -9,7 +9,7 @@ typedef struct {
   Uint64 previous_time;  // previous time. 0 upon initialization
   Uint64 delta_time;     // current - previous utility
   double times[F_TIMER_HISTORY_SIZE];  // sampling for FPS
-  size_t times_index;
+  size_t times_index;                  // internal member for updating times[]
 } F_Timer;
 
 void f_timer_init(F_Timer* timer);

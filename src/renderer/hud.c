@@ -155,8 +155,29 @@ void r_render_hud_fps(R_HUD* r_hud, SDL_Renderer* renderer) {
   }
 }
 
+// [TODO] Check success/failure
+// [TODO] Update only when seconds update
+// [TODO] Pass renderer manager instead of SDL renderer? That way, we could have
+// metadata such as window screen?
+void r_render_hud_time_elapsed(R_HUD* r_hud, SDL_Renderer* renderer,
+                               unsigned int time_elapsed) {
+  char timer_str[128];
+  sprintf(timer_str, "Time: %d", time_elapsed);
+  R_Text* text = new_r_text(renderer, timer_str, 24, r_hud->hud_font);
+  if (text == NULL) {
+    printf("[ERROR] Error creating timer text for HUD\n");
+    return;
+  }
+
+  SDL_Rect dest_rect = {
+      .x = 750, .y = 0, .w = text->texture_width, .h = text->texture_height};
+  SDL_RenderCopy(renderer, text->texture, NULL, &dest_rect);
+  r_destroy_text(text);
+}
+
 // [TODO] On error, return failure
-void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer) {
+void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer,
+                  unsigned int time_elapsed) {
   int score_gap = 80;  // x gap between each score
   for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
     const R_PlayerScore* curr_ps = r_hud->player_scores[i];
@@ -170,6 +191,7 @@ void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer) {
   }
 
   r_render_hud_fps(r_hud, renderer);
+  r_render_hud_time_elapsed(r_hud, renderer, time_elapsed);
 }
 
 // Function freeing R_HUD* resources is safe to call on NULL

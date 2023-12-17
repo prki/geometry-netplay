@@ -163,7 +163,8 @@ int main(void) {
 
   G_Session_Manager g_sess_mgr;
   initialize_game_session(&g_sess_mgr, game, r_mngr);
-  setup_game_session(&g_sess_mgr, G_GAMETYPE_LOCAL_MULTIPLAYER);
+  // [TODO] Validate return code/error
+  setup_game_session(&g_sess_mgr, G_GAMETYPE_LOCAL_MULTIPLAYER, 2);
 
   succ = register_game(r_mngr, game);
   if (!succ) {
@@ -171,34 +172,9 @@ int main(void) {
     return 1;
   }
 
-  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer,
-                          (const Player**)game->players, &f_timer);
-  if (!succ) {
-    SDL_Quit();
-    return 1;
-  }
-
-  int keep_running = 1;
-  SDL_Event evt;
-  float max_delta = (1.0 / MAX_FPS) * 1000.0;
-  while (keep_running) {
-    Uint64 start_time = SDL_GetPerformanceCounter();
-    while (SDL_PollEvent(&evt)) {
-      if (evt.type == SDL_QUIT) {
-        keep_running = 0;
-      }
-    }
-    f_timer_update(&f_timer);
-    double game_delta = f_timer.delta_time / 1000.0f;
-    game_update(game, game_delta);
-    render_frame(r_mngr, game_delta);
-    Uint64 end_time = SDL_GetPerformanceCounter();
-    if (!VSYNC_ON) {
-      float elapsedMs = (end_time - start_time) /
-                        (float)SDL_GetPerformanceFrequency() * 1000.0f;
-      SDL_Delay(floor(max_delta - elapsedMs));
-    }
-  }
+  F_Config cfg = {.r_vsync = VSYNC_ON, .r_max_fps = MAX_FPS};
+  // [TODO] Validate return code/error
+  run_game_session(&g_sess_mgr, &cfg);
 
   destroy_game(game);
   destroy_renderer_manager(r_mngr);
