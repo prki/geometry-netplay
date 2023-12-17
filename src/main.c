@@ -161,15 +161,6 @@ int main(void) {
   F_Timer f_timer;
   f_timer_init(&f_timer);
 
-  // [TODO] Shouldn't this also clean up game resources and such? (the if
-  // branch)
-  // succ =
-  //    r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->player, &f_timer);
-  // if (!succ) {
-  //  SDL_Quit();
-  //  return 1;
-  //}
-
   G_Session_Manager g_sess_mgr;
   initialize_game_session(&g_sess_mgr, game, r_mngr);
   setup_game_session(&g_sess_mgr, G_GAMETYPE_LOCAL_MULTIPLAYER);
@@ -180,10 +171,8 @@ int main(void) {
     return 1;
   }
 
-  // add_ai_player_to_session(&g_sess_mgr);
-
-  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer, game->players[0],
-                          &f_timer);
+  succ = r_initialize_hud(r_mngr->hud, r_mngr->renderer,
+                          (const Player**)game->players, &f_timer);
   if (!succ) {
     SDL_Quit();
     return 1;
