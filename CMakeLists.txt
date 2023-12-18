@@ -34,7 +34,6 @@ file(COPY ./assets DESTINATION ./)
 add_executable(geometry-netplay
   src/main.c
   src/player.c
-  src/menu.c
   src/asset_loader.c
   src/game.c
   src/game_event.c
@@ -53,6 +52,9 @@ add_executable(geometry-netplay
   src/renderer/font.c
   src/renderer/hud.c
   src/renderer/text.c
+  src/scene/s_main_menu.c
+  src/scene/s_orchestrator.c
+  src/ui/ui.c
 )
 
 target_link_libraries(geometry-netplay SDL2 SDL2main SDL2_ttf m)

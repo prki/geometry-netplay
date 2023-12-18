@@ -5,6 +5,7 @@
 #include "../game.h"
 #include "../math/shapes.h"
 #include "../player.h"
+#include "../scene/s_main_menu.h"
 #include "hud.h"
 #include "particle.h"
 
@@ -12,6 +13,9 @@
 
 // [TODO] Consider separating renderer manager into its own folder and struct
 // defs
+// [TODO] Actually, the code seems to converge to the architectural idea of
+// having scenes and orchestrating those scenes - in such case, r_mngr would not
+// hold such information itself.
 
 //////////////////////////////
 // Entities
@@ -33,6 +37,7 @@ typedef struct RenderableBulletPool {
 // Manager
 //////////////////////////////
 
+// [TODO] Move game-related pieces to a "game scene"
 typedef struct RendererManager {
   SDL_Renderer* renderer;
 
@@ -50,6 +55,8 @@ typedef struct RendererManager {
 RendererManager* new_renderer_manager(SDL_Window* window,
                                       SDL_Renderer* renderer);
 void destroy_renderer_manager(RendererManager* r_mngr);
+// int r_register_main_menu_scene(RendererManager* r_mngr,
+//                                S_Main_Menu* s_main_menu);
 int register_game(RendererManager* r_mngr, Game* game);
 int register_player(RendererManager* r_mngr, Player* plr);
 void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr);
@@ -57,6 +64,7 @@ void draw_rectangle_outline(RendererManager* r_mngr, const Rectangle* rect);
 int r_load_assets_fonts(RendererManager* r_mngr);
 
 void render_frame(RendererManager* r_mngr, double delta_time);
+void r_render_s_main_menu(RendererManager* r_mngr, S_Main_Menu* s_menu);
 void r_display_frame(RendererManager* r_mngr);
 
 #endif  // _RENDERER_MANAGER_H
