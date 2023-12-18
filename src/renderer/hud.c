@@ -1,5 +1,6 @@
 #include "hud.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -77,6 +78,8 @@ int r_initialize_hud(R_HUD* r_hud, SDL_Renderer* renderer,
   r_hud->fps_tick_timer = 30;
   r_hud->fps_ticks_to_render = 30;
   r_hud->fps_text = NULL;
+  r_hud->elapsed_secs_memo = -1;
+  r_hud->clock_text = NULL;
 
   for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
     if (players[i] != NULL) {
@@ -156,23 +159,35 @@ void r_render_hud_fps(R_HUD* r_hud, SDL_Renderer* renderer) {
 }
 
 // [TODO] Check success/failure
-// [TODO] Update only when seconds update
 // [TODO] Pass renderer manager instead of SDL renderer? That way, we could have
 // metadata such as window screen?
 void r_render_hud_time_elapsed(R_HUD* r_hud, SDL_Renderer* renderer,
                                unsigned int time_elapsed) {
   char timer_str[128];
-  sprintf(timer_str, "Time: %d", time_elapsed);
-  R_Text* text = new_r_text(renderer, timer_str, 24, r_hud->hud_font);
-  if (text == NULL) {
-    printf("[ERROR] Error creating timer text for HUD\n");
-    return;
+  double time_elapsed_secs = floor(time_elapsed / 1000.0f);
+  if ((long long int)time_elapsed_secs > r_hud->elapsed_secs_memo) {
+    double time_elapsed_mins = floor(time_elapsed_secs / 60.0f);
+    double time_elapsed_secs_remainder = fmod(time_elapsed_secs, 60.0);
+    sprintf(timer_str, "Time: %02d:%02d", (int)time_elapsed_mins,
+            (int)time_elapsed_secs_remainder);
+    R_Text* text = new_r_text(renderer, timer_str, 24, r_hud->hud_font);
+    if (text == NULL) {
+      printf("[ERROR] Error creating clock text for HUD\n");
+      return;
+    }
+
+    if (r_hud->clock_text != NULL) {
+      r_destroy_text(r_hud->clock_text);
+    }
+    r_hud->clock_text = text;
+    r_hud->elapsed_secs_memo = (long long int)time_elapsed_secs;
   }
 
-  SDL_Rect dest_rect = {
-      .x = 750, .y = 0, .w = text->texture_width, .h = text->texture_height};
-  SDL_RenderCopy(renderer, text->texture, NULL, &dest_rect);
-  r_destroy_text(text);
+  SDL_Rect dest_rect = {.x = 750,
+                        .y = 0,
+                        .w = r_hud->clock_text->texture_width,
+                        .h = r_hud->clock_text->texture_height};
+  SDL_RenderCopy(renderer, r_hud->clock_text->texture, NULL, &dest_rect);
 }
 
 // [TODO] On error, return failure
@@ -202,6 +217,9 @@ void destroy_r_hud(R_HUD* r_hud) {
     }
     for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
       r_destroy_r_playerscore(r_hud->player_scores[i]);
+    }
+    if (r_hud->clock_text != NULL) {
+      r_destroy_text(r_hud->clock_text);
     }
 
     free(r_hud);

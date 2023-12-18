@@ -133,6 +133,7 @@ int is_game_over(G_Game_Rules g_rules, G_Rule_Checker g_rule_checker) {
 // finished based on its set rules.
 // [TODO] Implement enum/defines with return codes (e.g. game quit, game over ->
 // show result screen, ...)
+// [TODO] Validate that timer really starts at 00:00 msec?
 int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
   int keep_running = 1;
   SDL_Event evt;
@@ -141,7 +142,7 @@ int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
   while (keep_running) {
     Uint64 start_time = SDL_GetPerformanceCounter();
     if (is_game_over(g_sess_mgr->g_rules, g_sess_mgr->g_rule_checker)) {
-      printf("[G_SESS_MGR] Game is over based on rules\n");
+      // printf("[G_SESS_MGR] Game is over based on rules\n");
     }
 
     while (SDL_PollEvent(&evt)) {
