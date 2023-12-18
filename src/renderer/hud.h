@@ -30,6 +30,9 @@ typedef struct {
   const F_Timer* f_timer;
   int fps_tick_timer;
   int fps_ticks_to_render;
+  R_Text* clock_text;
+  long long int elapsed_secs_memo;  // Tracking time to check whether time
+                                    // should be updated
   R_Text* fps_text;
   R_PlayerScore* player_scores[G_MAX_PC_PLAYERS];
 } R_HUD;

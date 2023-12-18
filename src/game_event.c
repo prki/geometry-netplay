@@ -23,6 +23,9 @@ void destroy_game_event(GameEvent* evt) {
     if (evt->type == RECT_COLLISION) {
       destroy_rect_collision_data((RectCollisionData*)evt->data);
     }
+    if (evt->type == BULLET_IMPACT) {
+      free(evt->data);
+    }
 
     free(evt);
   }

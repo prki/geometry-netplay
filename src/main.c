@@ -1,5 +1,4 @@
 #include <SDL.h>
-#include <math.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -26,7 +25,7 @@
 
 /* [TODO] [BUG] If window succeeds but renderer does not, no sign
  * which to destroy*/
-int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer) {
+int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer, F_Config cfg) {
   *window =
       SDL_CreateWindow("Pekelna parba", SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
@@ -35,7 +34,7 @@ int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer) {
     return 0;
   }
 
-  if (VSYNC_ON) {
+  if (cfg.r_vsync) {
     *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_PRESENTVSYNC);
   } else {
     *renderer = SDL_CreateRenderer(*window, -1, 0);
@@ -124,13 +123,14 @@ int main(void) {
   SDL_Renderer* renderer = NULL;
   RendererManager* r_mngr = NULL;
   srand(time(NULL));
+  F_Config cfg = {.r_vsync = !VSYNC_ON, .r_max_fps = MAX_FPS};
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     return 1;
   }
 
-  succ = initialize_SDL(&window, &renderer);
+  succ = initialize_SDL(&window, &renderer, cfg);
   if (!succ) {
     SDL_Quit();
     return 1;
@@ -172,7 +172,6 @@ int main(void) {
     return 1;
   }
 
-  F_Config cfg = {.r_vsync = VSYNC_ON, .r_max_fps = MAX_FPS};
   // [TODO] Validate return code/error
   run_game_session(&g_sess_mgr, &cfg);
 
