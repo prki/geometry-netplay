@@ -73,6 +73,12 @@ int s_run_main_menu_loop(S_Orchestrator* s_orche) {
     }
 
     r_render_s_main_menu(s_orche->r_mngr, s_orche->s_main_menu);
+    if (ui_is_button_clicked(s_orche->s_main_menu->quit_btn)) {
+      return RETURN_QUIT;
+    }
+    if (ui_is_button_clicked(s_orche->s_main_menu->new_game_btn)) {
+      return RETURN_NEW_GAME;
+    }
     r_display_frame(s_orche->r_mngr);
   }
 

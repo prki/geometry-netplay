@@ -5,8 +5,15 @@
 
 #include "../ui/ui.h"
 
+typedef enum {
+  RETURN_UNEXPECTED = 1,
+  RETURN_QUIT = 2,
+  RETURN_NEW_GAME = 3,
+} S_Main_Menu_Return_Codes;
+
 typedef struct {
-  UI_Button* quit_button;
+  UI_Button* new_game_btn;
+  UI_Button* quit_btn;
 } S_Main_Menu;
 
 S_Main_Menu* s_new_main_menu(SDL_Renderer* renderer);

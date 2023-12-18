@@ -1,5 +1,6 @@
 #include "ui.h"
 
+#include <SDL.h>
 #include <stdio.h>
 
 UI_Button* ui_new_button(int x, int y, int w, int h, SDL_Texture* txtr,
@@ -33,5 +34,30 @@ void ui_destroy_button(UI_Button* btn) {
 
     free(btn);
     btn = NULL;
+  }
+}
+
+// Returns 0 if button is not clicked, 1 if the button is clicked.
+int ui_is_button_clicked(UI_Button* btn) {
+  SDL_Point point;
+  int mouse_state = SDL_GetMouseState(&point.x, &point.y);
+  if (!SDL_PointInRect(&point, &btn->rect)) {
+    return 0;
+  }
+
+  if ((SDL_BUTTON(mouse_state) & SDL_BUTTON_LEFT) == SDL_BUTTON_LEFT) {
+    return 1;
+  }
+
+  return 0;
+}
+
+void ui_render_button(UI_Button* btn, SDL_Renderer* renderer) {
+  SDL_Point point;
+  SDL_GetMouseState(&point.x, &point.y);
+  if (SDL_PointInRect(&point, &btn->rect)) {
+    SDL_RenderCopy(renderer, btn->btn_txtr_hover, NULL, &btn->rect);
+  } else {
+    SDL_RenderCopy(renderer, btn->btn_txtr, NULL, &btn->rect);
   }
 }
