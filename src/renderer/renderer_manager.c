@@ -8,6 +8,7 @@
 #include "../game.h"
 #include "../game_world.h"
 #include "../math/vector.h"
+#include "../scene/s_main_menu.h"
 #include "hud.h"
 #include "particle.h"
 
@@ -392,6 +393,17 @@ void render_particles(RendererManager* r_mngr) {
       SDL_RenderDrawPoint(r_mngr->renderer, tmp->position.x, tmp->position.y);
     }
   }
+}
+
+// Function rendering the main menu scene.
+// Function clears the background but does not call SDL_RenderPresent() at the
+// end to enable further metadata rendering. r_display_frame() should be called
+// once the frame should be rendered in its entirety.
+void r_render_s_main_menu(RendererManager* r_mngr, S_Main_Menu* s_menu) {
+  SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(r_mngr->renderer);
+
+  s_render_s_main_menu((S_Main_Menu*)s_menu, r_mngr->renderer);
 }
 
 // Function rendering all game-related elements into the SDL renderer.

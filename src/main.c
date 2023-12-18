@@ -8,6 +8,8 @@
 #include "g_session_manager.h"
 #include "game.h"
 #include "renderer/renderer_manager.h"
+#include "scene/s_main_menu.h"
+#include "scene/s_orchestrator.h"
 
 // This game has been programmed to assume VSYNC is on - however, physics
 // and rendering are calculated using elapsed delta times. As such, it is
@@ -47,76 +49,6 @@ int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer, F_Config cfg) {
   return 1;
 }
 
-/*void draw_menu_option(SDL_Renderer* renderer) {
-  int x = 0;
-  int y = 0;
-  SDL_GetMouseState(&x, &y);
-
-  SDL_Point point;
-  point.x = x;
-  point.y = y;
-
-  SDL_Rect menu_option;
-  menu_option.w = 300;
-  menu_option.h = 32;
-  menu_option.x = SCREEN_WIDTH / 2 - (menu_option.w / 2);
-  menu_option.y = SCREEN_HEIGHT / 2 - menu_option.h;
-
-  if (SDL_PointInRect(&point, &menu_option)) {
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-  } else {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  }
-  SDL_RenderFillRect(renderer, &menu_option);
-}
-
-void draw_background(SDL_Renderer* renderer) {
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderClear(renderer);
-}*/
-
-/*int main(void) {
-  SDL_Window* window = NULL;
-  SDL_Renderer* renderer = NULL;
-  int keep_running = 1;
-  int succ = 0;
-  SDL_Event evt;
-
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf("[ERROR] SDL could not initialize. SDL Error: %s\n", SDL_GetError());
-    return 1;
-  }
-
-  succ = initialize_SDL(&window, &renderer);
-  if (!succ) {
-    SDL_Quit();
-    return 1;
-  }
-
-  Menu* menu = new_menu(renderer);
-  // [TODO] renderer/window should also be freed
-  if (menu == NULL) {
-    SDL_Quit();
-    return 1;
-  }
-
-  while (keep_running) {
-    while (SDL_PollEvent(&evt)) {
-      if (evt.type == SDL_QUIT) {
-        keep_running = 0;
-      }
-    }
-    handle_menu_logic(menu);
-    render_menu(renderer, menu);
-  }
-
-  destroy_menu(menu);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
-  return 0;
-}
-*/
 int main(void) {
   int succ = 0;
   SDL_Window* window = NULL;
@@ -161,6 +93,27 @@ int main(void) {
   F_Timer f_timer;
   f_timer_init(&f_timer);
 
+  S_Orchestrator* s_orchestrator = s_new_orchestrator();
+  if (s_orchestrator == NULL) {
+    SDL_Quit();
+    return 1;
+  }
+
+  S_Main_Menu* s_main_menu = s_new_main_menu(r_mngr->renderer);
+  if (s_main_menu == NULL) {
+    SDL_Quit();
+    return 1;
+  }
+
+  succ = s_orchestrator_register_r_mngr(s_orchestrator, r_mngr);
+  if (!succ) {
+    SDL_Quit();
+    return 1;
+  }
+  succ = s_orchestrator_register_s_main_menu(s_orchestrator, s_main_menu);
+
+  s_run_main_menu_loop(s_orchestrator);
+
   G_Session_Manager g_sess_mgr;
   initialize_game_session(&g_sess_mgr, game, r_mngr);
   // [TODO] Validate return code/error
@@ -176,6 +129,7 @@ int main(void) {
   run_game_session(&g_sess_mgr, &cfg);
 
   destroy_game(game);
+  s_destroy_orchestrator(s_orchestrator);
   destroy_renderer_manager(r_mngr);
   SDL_DestroyWindow(window);
   SDL_Quit();
