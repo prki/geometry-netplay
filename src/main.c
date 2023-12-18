@@ -112,7 +112,11 @@ int main(void) {
   }
   succ = s_orchestrator_register_s_main_menu(s_orchestrator, s_main_menu);
 
-  s_run_main_menu_loop(s_orchestrator);
+  int ret = s_run_main_menu_loop(s_orchestrator);
+  if (ret == RETURN_QUIT) {
+    SDL_Quit();
+    return 1;
+  }
 
   G_Session_Manager g_sess_mgr;
   initialize_game_session(&g_sess_mgr, game, r_mngr);

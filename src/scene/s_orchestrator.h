@@ -4,6 +4,12 @@
 #include "../renderer/renderer_manager.h"
 #include "s_main_menu.h"
 
+// Scene orchestrator is the highest level layer in the game's architecture. It
+// is responsible for containing all of the scenes/views visible to the player -
+// such as the menus, gameplay scene and/or others.
+// Each scene is provided as its own member and a function for orchestrator is
+// provided which runs the entire loop with all its possible
+// dependencies/specifics.
 typedef struct {
   S_Main_Menu* s_main_menu;
   RendererManager* r_mngr;  // Not owned when s_orchestrator free'd
