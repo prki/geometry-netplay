@@ -105,12 +105,27 @@ int main(void) {
     return 1;
   }
 
+  S_Results* s_results = s_new_results(r_mngr->font_storage, r_mngr->renderer);
+  if (s_results == NULL) {
+    SDL_Quit();
+    return 1;
+  }
+
   succ = s_orchestrator_register_r_mngr(s_orchestrator, r_mngr);
   if (!succ) {
     SDL_Quit();
     return 1;
   }
   succ = s_orchestrator_register_s_main_menu(s_orchestrator, s_main_menu);
+  if (!succ) {
+    SDL_Quit();
+    return 1;
+  }
+  succ = s_orchestrator_register_s_results(s_orchestrator, s_results);
+  if (!succ) {
+    SDL_Quit();
+    return 1;
+  }
 
   int ret = s_run_main_menu_loop(s_orchestrator);
   if (ret == RETURN_QUIT) {
@@ -131,6 +146,8 @@ int main(void) {
 
   // [TODO] Validate return code/error
   run_game_session(&g_sess_mgr, &cfg);
+
+  s_run_results_loop(s_orchestrator);
 
   destroy_game(game);
   s_destroy_orchestrator(s_orchestrator);
