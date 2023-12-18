@@ -113,3 +113,10 @@ void r_destroy_text(R_Text* text) {
     free(text);
   }
 }
+
+void r_render_text(const R_Text* text, SDL_Renderer* renderer, const int x,
+                   const int y) {
+  SDL_Rect dest_rect = {
+      .x = x, .y = y, .w = text->texture_width, .h = text->texture_height};
+  SDL_RenderCopy(renderer, text->texture, NULL, &dest_rect);
+}

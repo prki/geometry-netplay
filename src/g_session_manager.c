@@ -143,6 +143,7 @@ int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
     Uint64 start_time = SDL_GetPerformanceCounter();
     if (is_game_over(g_sess_mgr->g_rules, g_sess_mgr->g_rule_checker)) {
       // printf("[G_SESS_MGR] Game is over based on rules\n");
+      return 2;
     }
 
     while (SDL_PollEvent(&evt)) {

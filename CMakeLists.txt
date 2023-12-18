@@ -54,6 +54,7 @@ add_executable(geometry-netplay
   src/renderer/text.c
   src/scene/s_main_menu.c
   src/scene/s_orchestrator.c
+  src/scene/s_results.c
   src/ui/ui.c
 )
 

@@ -403,7 +403,14 @@ void r_render_s_main_menu(RendererManager* r_mngr, S_Main_Menu* s_menu) {
   SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
   SDL_RenderClear(r_mngr->renderer);
 
-  s_render_s_main_menu((S_Main_Menu*)s_menu, r_mngr->renderer);
+  s_render_s_main_menu(s_menu, r_mngr->renderer);
+}
+
+void r_render_s_results(RendererManager* r_mngr, S_Results* s_results) {
+  SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(r_mngr->renderer);
+
+  s_render_s_results(s_results, r_mngr->renderer);
 }
 
 // Function rendering all game-related elements into the SDL renderer.
