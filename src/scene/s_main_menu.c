@@ -27,7 +27,7 @@ UI_Button* _init_quit_button(SDL_Renderer* renderer) {
   }
 
   UI_Button* quit_btn =
-      ui_new_button(50, 50, 300, 32, btn_txtr, btn_txtr_hover, NULL);
+      ui_new_button(650, 500, 300, 32, btn_txtr, btn_txtr_hover, NULL);
   if (quit_btn == NULL) {
     printf("[ERROR] err new main menu scene - new quit_btn fail\n");
     SDL_DestroyTexture(btn_txtr);
@@ -59,7 +59,7 @@ UI_Button* _init_new_game_button(SDL_Renderer* renderer) {
   }
 
   UI_Button* new_game_btn =
-      ui_new_button(50, 120, 300, 32, btn_txtr, btn_txtr_hover, NULL);
+      ui_new_button(650, 400, 300, 32, btn_txtr, btn_txtr_hover, NULL);
   if (new_game_btn == NULL) {
     printf("[ERROR] Err new game btn - new btn fail\n");
     SDL_DestroyTexture(btn_txtr);

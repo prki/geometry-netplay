@@ -9,7 +9,12 @@
 
 R_PlayerScore* r_new_r_playerscore(const Player* player, const R_Font* font,
                                    SDL_Renderer* renderer) {
-  R_Text* text = new_r_text(renderer, "Score 0", 8, font);
+  R_Text* text = NULL;
+  if (player->player_ship.ship_color == BLUE) {
+    text = new_r_text(renderer, "Score BLUE: 0", 32, font);
+  } else if (player->player_ship.ship_color == RED) {
+    text = new_r_text(renderer, "Score RED: 0", 32, font);
+  }
   if (text == NULL) {
     printf("[ERROR] err new r_playerscore - text null\n");
     return NULL;
@@ -99,10 +104,14 @@ int r_initialize_hud(R_HUD* r_hud, SDL_Renderer* renderer,
 int r_playerscore_update(R_PlayerScore* r_ps, SDL_Renderer* renderer) {
   char score_str[256];
   strncpy(score_str, "\0", 256);
-  sprintf(score_str, "Score %d", r_ps->pc_player->score);
+  if (r_ps->pc_player->player_ship.ship_color == BLUE) {
+    sprintf(score_str, "Score BLUE: %d", r_ps->pc_player->score);
+  } else if (r_ps->pc_player->player_ship.ship_color == RED) {
+    sprintf(score_str, "Score RED: %d", r_ps->pc_player->score);
+  }
   r_destroy_text(r_ps->score_text);
 
-  R_Text* text = new_r_text(renderer, score_str, 10, r_ps->score_font);
+  R_Text* text = new_r_text(renderer, score_str, 32, r_ps->score_font);
   if (text == NULL) {
     printf("[ERROR] Error creating score text when updating HUD\n");
     return 0;
@@ -195,7 +204,8 @@ void r_render_hud_time_elapsed(R_HUD* r_hud, SDL_Renderer* renderer,
 // [TODO] On error, return failure
 void r_render_hud(R_HUD* r_hud, SDL_Renderer* renderer,
                   unsigned int time_elapsed) {
-  int score_gap = 80;  // x gap between each score
+  int score_gap = r_hud->player_scores[0]->score_text->texture_width +
+                  64;  // x gap between each score
   for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
     const R_PlayerScore* curr_ps = r_hud->player_scores[i];
     if (curr_ps != NULL) {

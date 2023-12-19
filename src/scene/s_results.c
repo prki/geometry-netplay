@@ -100,14 +100,20 @@ int s_setup_results(S_Results* s_results, const ResultReport result_report,
 void s_render_s_results(S_Results* s_results, SDL_Renderer* renderer) {
   int x = (1600 / 2) - (s_results->header_text->texture_width / 2);
   int y = 100;
+  SDL_Rect dest_rect = {.x = 0, .y = y, .w = 32, .h = 32};
 
   r_render_text(s_results->header_text, renderer, x, y);
 
   y = 200;
   r_render_text(s_results->winner_text, renderer, x, y);
+  dest_rect.x = x + s_results->winner_text->texture_width + 30;
+  dest_rect.y = y - 8;
+  SDL_RenderCopy(renderer, s_results->winner_txtr, NULL, &dest_rect);
 
   y = 300;
+  dest_rect.y = y - 8;
   r_render_text(s_results->loser_text, renderer, x, y);
+  SDL_RenderCopy(renderer, s_results->loser_txtr, NULL, &dest_rect);
 
   ui_render_button(s_results->menu_btn, renderer);
   ui_render_button(s_results->rematch_btn, renderer);

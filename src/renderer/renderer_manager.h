@@ -51,6 +51,7 @@ typedef struct RendererManager {
                           // rectangles with different textures etc
   FontStorage* font_storage;
   R_HUD* hud;
+  SDL_Texture* background;
 } RendererManager;
 
 RendererManager* new_renderer_manager(SDL_Window* window,

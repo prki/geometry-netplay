@@ -19,7 +19,7 @@ typedef struct Player {
 
 Player* new_pc_player(vec2d ship_position, double hurtcirc_radius,
                       size_t ship_width, vec2d shoot_direction,
-                      F_Controls controls);
+                      F_Controls controls, G_Ship_Color ship_color);
 Player* new_ai_player(vec2d ship_position, double hurtcirc_radius,
                       size_t ship_width, vec2d shoot_direction);
 void destroy_player(Player* plr);

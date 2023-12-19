@@ -59,5 +59,5 @@ add_executable(geometry-netplay
   src/ui/ui.c
 )
 
-target_link_libraries(geometry-netplay SDL2 SDL2main SDL2_ttf m)
+target_link_libraries(geometry-netplay SDL2main SDL2_ttf m)
 target_include_directories(geometry-netplay PUBLIC ${sdl2_SOURCE_DIR}/include)

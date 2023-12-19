@@ -26,6 +26,7 @@ void _nullify_renderable_players(RendererManager* r_mngr) {
 }
 
 // [TODO] Create a better alloc/free flow
+// [TODO] Remove many of these once game becomes scene
 RendererManager* new_renderer_manager(SDL_Window* window,
                                       SDL_Renderer* renderer) {
   if (renderer == NULL) {
@@ -46,6 +47,8 @@ RendererManager* new_renderer_manager(SDL_Window* window,
     TTF_Quit();
     return NULL;
   }
+  mngr->background = NULL;
+
   ParticlePool* particle_pool = new_particle_pool();
   if (particle_pool == NULL) {
     printf("[ERROR] Cannot initialize r_manager - NULL particle pool\n");
@@ -71,10 +74,20 @@ RendererManager* new_renderer_manager(SDL_Window* window,
     r_destroy_font_storage(fs);
     return NULL;
   }
+  SDL_Texture* bg = load_texture_from_bmp(renderer, "./assets/bg_grid.bmp");
+  if (bg == NULL) {
+    printf("[ERROR] Err init r_manager - NULL bg\n");
+    TTF_Quit();
+    free(mngr);
+    destroy_particle_pool(particle_pool);
+    r_destroy_font_storage(fs);
+    destroy_r_hud(hud);
+  }
 
   mngr->renderer = renderer;
   mngr->particle_pool = particle_pool;
   mngr->hud = hud;
+  mngr->background = bg;
 
   _nullify_renderable_players(mngr);
   mngr->renderable_players_size = 0;
@@ -112,6 +125,9 @@ void destroy_renderer_manager(RendererManager* r_mngr) {
     if (r_mngr->font_storage != NULL) {
       r_destroy_font_storage(r_mngr->font_storage);
     }
+    if (r_mngr->background != NULL) {
+      SDL_DestroyTexture(r_mngr->background);
+    }
 
     SDL_DestroyRenderer(r_mngr->renderer);
     TTF_Quit();
@@ -123,7 +139,7 @@ void destroy_renderer_manager(RendererManager* r_mngr) {
 // Returns 1 on success, 0 on failure. Assumes TTF_Init()
 // has already been called.
 int r_load_assets_fonts(RendererManager* r_mngr) {
-  R_Font* font = new_font("./assets/fonts/Arial.ttf", 12);
+  R_Font* font = new_font("./assets/fonts/Arial.ttf", 18);
   if (font == NULL) {
     printf("[ERROR] err loading assets (fonts) - font load failure\n");
     return 0;
@@ -148,8 +164,17 @@ int register_player(RendererManager* r_mngr, Player* plr) {
     return 0;
   }
 
-  plr_txtr =
-      load_texture_from_bmp(r_mngr->renderer, "./assets/player_texture.bmp");
+  if (plr->player_ship.ship_color == RED) {
+    plr_txtr =
+        load_texture_from_bmp(r_mngr->renderer, "./assets/player_texture.bmp");
+  } else if (plr->player_ship.ship_color == BLUE) {
+    plr_txtr = load_texture_from_bmp(r_mngr->renderer,
+                                     "./assets/player_texture_blue.bmp");
+  } else {
+    printf(
+        "[ERROR] Error registering player to r_mngr - unhandled ship color\n");
+    return 0;
+  }
   if (plr_txtr == NULL) {
     printf("[ERROR] Error loading player texture bitmap during registration\n");
     return 0;
@@ -236,10 +261,11 @@ int register_game(RendererManager* r_mngr, Game* game) {
 // should be unregistered, as the rest just accepts a pointer - no relevant
 // change. [TODO] DELME once game becomes a scene.
 void r_unregister_game(RendererManager* r_mngr) {
-  for (size_t i = 0; i < r_mngr->renderable_players_size; i++) {
+  /*for (size_t i = 0; i < r_mngr->renderable_players_size; i++) {
     r_mngr->renderable_players[i].player = NULL;
     r_mngr->renderable_players[i].texture = NULL;
   }
+  */
   r_mngr->renderable_players_size = 0;
 }
 
@@ -327,10 +353,21 @@ void draw_rectangle_outline(RendererManager* r_mngr, const Rectangle* rect) {
                      rect->a4.y);
 }
 
+// Helper function drawing a filled rectangle. Note that it is assumed
+// the rectangle is not rotated in any way and as such is axis-aligned.
+void draw_rectangle_fill(RendererManager* r_mngr, const Rectangle* rect) {
+  SDL_Rect r = {.x = rect->a1.x,
+                .y = rect->a1.y,
+                .w = rect->a2.x - rect->a1.x,
+                .h = rect->a3.y - rect->a1.y};
+  SDL_RenderFillRect(r_mngr->renderer, &r);
+}
+
 void draw_rectangles(RendererManager* r_mngr) {
   SDL_SetRenderDrawColor(r_mngr->renderer, 255, 0, 0, 255);
   for (unsigned int i = 0; i < r_mngr->game_world->rects->size; i++) {
     draw_rectangle_outline(r_mngr, &(r_mngr->game_world->rects->array[i]));
+    // draw_rectangle_fill(r_mngr, &(r_mngr->game_world->rects->array[i]));
   }
 }
 
@@ -424,6 +461,11 @@ void r_render_s_results(RendererManager* r_mngr, S_Results* s_results) {
   s_render_s_results(s_results, r_mngr->renderer);
 }
 
+void r_render_background(RendererManager* r_mngr) {
+  SDL_Rect dest_rect = {.x = 0, .y = 0, .w = 1600, .h = 900};
+  SDL_RenderCopy(r_mngr->renderer, r_mngr->background, NULL, &dest_rect);
+}
+
 // Function rendering all game-related elements into the SDL renderer.
 // Note that it does not call SDL_RenderPresent() as there may be post-rendering
 // activities to perform, such as rendering scoreboards or anything else
@@ -433,9 +475,11 @@ void render_frame(RendererManager* r_mngr, double delta_time) {
   SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
   SDL_RenderClear(r_mngr->renderer);
 
+  r_render_background(r_mngr);
+
   for (size_t i = 0; i < r_mngr->renderable_players_size; i++) {
     draw_player(r_mngr, &r_mngr->renderable_players[i]);
-    draw_player_outlines(r_mngr, &r_mngr->renderable_players[i]);
+    // draw_player_outlines(r_mngr, &r_mngr->renderable_players[i]);
   }
   SDL_SetRenderDrawColor(r_mngr->renderer, 255, 0, 0, 255);
 
