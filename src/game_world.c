@@ -12,13 +12,13 @@ void create_game_boundaries(RectangleArray* rect_arr) {
   // left
   double posX = -50;
   double posY = -50;
-  double width = 100;
+  double width = 70;
   double height = SCREEN_HEIGHT + 200;
   Rectangle left_boundary = new_rectangle(posX, posY, width, height);
   rectanglearray_insert_rectangle(rect_arr, &left_boundary);
   //  top
   width = SCREEN_WIDTH + 200;
-  height = 100;
+  height = 70;
   Rectangle top_boundary = new_rectangle(posX, posY, width, height);
   rectanglearray_insert_rectangle(rect_arr, &top_boundary);
   //   bottom
@@ -28,7 +28,7 @@ void create_game_boundaries(RectangleArray* rect_arr) {
   //  right
   posX = SCREEN_WIDTH - 50;
   posY = -50;
-  width = 100;
+  width = 70;
   height = SCREEN_HEIGHT + 200;
   Rectangle right_boundary = new_rectangle(posX, posY, width, height);
   rectanglearray_insert_rectangle(rect_arr, &right_boundary);

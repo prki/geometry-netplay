@@ -147,7 +147,8 @@ int s_orchestrator_register_s_results(S_Orchestrator* s_orche,
 }
 
 // [TODO] Implementation only considers 2 players. Make this more universal.
-ResultReport s_calc_result_report(S_Game* s_game) {
+ResultReport s_calc_result_report(S_Orchestrator* s_orche) {
+  S_Game* s_game = s_orche->s_game;
   int scores[2];
   for (size_t i = 0; i < 2; i++) {
     scores[i] = 0;
@@ -163,9 +164,15 @@ ResultReport s_calc_result_report(S_Game* s_game) {
   }
 
   if (scores[0] > scores[1]) {
-    return (ResultReport){.score_winner = scores[0], .score_loser = scores[1]};
+    return (ResultReport){.score_winner = scores[0],
+                          .score_loser = scores[1],
+                          .winner_idx = 0,
+                          .loser_idx = 1};
   } else {
-    return (ResultReport){.score_winner = scores[1], .score_loser = scores[0]};
+    return (ResultReport){.score_winner = scores[1],
+                          .score_loser = scores[0],
+                          .winner_idx = 1,
+                          .loser_idx = 0};
   }
 }
 
@@ -220,6 +227,21 @@ S_Scene_Code s_run_results_loop(S_Orchestrator* s_orche) {
   return SCENE_QUIT;
 }
 
+// // [TODO] Should be in s_setup_results() but this being in r_manager and not
+// s_game makes it tough. Fix once game has a scene
+void s_setup_result_textures(S_Orchestrator* s_orche,
+                             const ResultReport report) {
+  SDL_Texture* winner_texture = NULL;
+  SDL_Texture* loser_texture = NULL;
+
+  winner_texture =
+      s_orche->r_mngr->renderable_players[report.winner_idx].texture;
+  loser_texture = s_orche->r_mngr->renderable_players[report.loser_idx].texture;
+
+  s_orche->s_results->winner_txtr = winner_texture;
+  s_orche->s_results->loser_txtr = loser_texture;
+}
+
 // [TODO] We want to have better return code handling and such - but that will
 // be easier to do once game is migrated to being a scene. Until then, this will
 // be kept ugly, since it can be, for the most part.
@@ -243,9 +265,11 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
       return SCENE_RESULTS;
     }
   } else if (s_scene_code == SCENE_RESULTS) {
-    ResultReport report = s_calc_result_report(s_orche->s_game);
+    ResultReport report = s_calc_result_report(s_orche);
     int succ =
         s_setup_results(s_orche->s_results, report, s_orche->r_mngr->renderer);
+    s_setup_result_textures(
+        s_orche, report);  // [TODO] DELME + better once game is scene
     if (!succ) {
       printf("[ERROR] [S_ORCHE] err initializing resultboard\n");
       return SCENE_QUIT;

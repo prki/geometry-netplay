@@ -13,7 +13,7 @@
 
 Player* new_pc_player(vec2d ship_position, double hurtcirc_radius,
                       size_t ship_width, vec2d shoot_direction,
-                      F_Controls controls) {
+                      F_Controls controls, G_Ship_Color ship_color) {
   Player* plr = NULL;
 
   plr = malloc(sizeof(Player));
@@ -22,8 +22,8 @@ Player* new_pc_player(vec2d ship_position, double hurtcirc_radius,
     return NULL;
   }
 
-  plr->player_ship =
-      create_ship(ship_position, ship_width, hurtcirc_radius, NULL, NULL, NULL);
+  plr->player_ship = create_ship(ship_position, ship_width, hurtcirc_radius,
+                                 NULL, NULL, NULL, ship_color);
   plr->shoot_direction = shoot_direction;
   plr->shoot_timer = 0;
   plr->shoot_interval = 70;
@@ -44,8 +44,8 @@ Player* new_ai_player(vec2d ship_position, double hurtcirc_radius,
     return NULL;
   }
 
-  plr->player_ship =
-      create_ship(ship_position, ship_width, hurtcirc_radius, NULL, NULL, NULL);
+  plr->player_ship = create_ship(ship_position, ship_width, hurtcirc_radius,
+                                 NULL, NULL, NULL, BLUE);
   plr->shoot_direction = shoot_direction;
   plr->shoot_timer = 0;
   plr->shoot_interval = 70;

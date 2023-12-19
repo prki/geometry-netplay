@@ -48,7 +48,7 @@ int _setup_local_multiplayer(G_Session_Manager* g_sess_mgr) {
   size_t ship_width = 32;
   vec2d shoot_direction = {.x = 0, .y = -1};
   Player* p1 = new_pc_player(p1_initial_ship_pos, hurtcirc_radius, ship_width,
-                             shoot_direction, controls_p1);
+                             shoot_direction, controls_p1, RED);
   if (p1 == NULL) {
     printf("[ERROR] Error setting up local multiplayer - p1 null\n");
     return 0;
@@ -56,7 +56,7 @@ int _setup_local_multiplayer(G_Session_Manager* g_sess_mgr) {
   F_Controls controls_p2 = f_default_player2_controls();
   vec2d p2_initial_ship_pos = {.x = 1450, .y = 416};
   Player* p2 = new_pc_player(p2_initial_ship_pos, hurtcirc_radius, ship_width,
-                             shoot_direction, controls_p2);
+                             shoot_direction, controls_p2, BLUE);
   if (p2 == NULL) {
     printf("[ERROR] Error setting up local multiplayer - p2 null\n");
     return 0;
@@ -85,7 +85,7 @@ int _setup_local_singleplayer(G_Session_Manager* g_sess_mgr) {
   size_t ship_width = 32;
   vec2d shoot_direction = {.x = 0, .y = -1};
   Player* player = new_pc_player(p1_initial_ship_pos, hurtcirc_radius,
-                                 ship_width, shoot_direction, controls_p1);
+                                 ship_width, shoot_direction, controls_p1, RED);
   if (player == NULL) {
     printf("[ERROR] Error setting up local singleplayer - player null\n");
     return 0;

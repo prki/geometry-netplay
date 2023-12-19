@@ -13,7 +13,8 @@ vec2d _calc_ship_center_offset(size_t ship_width) {
 // passed.
 Ship create_ship(const vec2d position, size_t ship_width,
                  const double hurtcirc_radius, const vec2d* hurtcirc_offset,
-                 const double* collcirc_radius, const vec2d* collcirc_offset) {
+                 const double* collcirc_radius, const vec2d* collcirc_offset,
+                 G_Ship_Color ship_color) {
   double collcirc_radius_stack;  // workaround as a pointer is passed
   vec2d hurtcirc_offset_stack;
   vec2d collcirc_offset_stack;
@@ -49,7 +50,8 @@ Ship create_ship(const vec2d position, size_t ship_width,
               .hurtcirc = hurtcircle,
               .hurtcirc_offset = hurtcirc_offset_stack,
               .collision_circ = collcirc,
-              .collision_circ_offset = collcirc_offset_stack};
+              .collision_circ_offset = collcirc_offset_stack,
+              .ship_color = ship_color};
 
   return ret;
 }
