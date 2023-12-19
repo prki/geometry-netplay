@@ -146,6 +146,29 @@ int s_orchestrator_register_s_results(S_Orchestrator* s_orche,
   return 1;
 }
 
+// [TODO] Implementation only considers 2 players. Make this more universal.
+ResultReport s_calc_result_report(S_Game* s_game) {
+  int scores[2];
+  for (size_t i = 0; i < 2; i++) {
+    scores[i] = 0;
+  }
+
+  const Player* tmp = NULL;
+  for (size_t i = 0; i < 2; i++) {
+    tmp = s_game->game->players[i];
+    if (tmp == NULL) {
+      printf("[WARN] Player was NULL when calculating result report\n");
+    }
+    scores[i] = tmp->score;
+  }
+
+  if (scores[0] > scores[1]) {
+    return (ResultReport){.score_winner = scores[0], .score_loser = scores[1]};
+  } else {
+    return (ResultReport){.score_winner = scores[1], .score_loser = scores[0]};
+  }
+}
+
 // [TODO] All the "run loop" functions are going to work in a similar way - is
 // there any way to make them into a generic thing?
 int s_run_main_menu_loop(S_Orchestrator* s_orche) {
@@ -205,13 +228,20 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
     // [TODO] This should probably be moved to some "scene_setup()" function?
     F_Config cfg = {.r_vsync = 1, .r_max_fps = 200};
     setup_game_session(&s_orche->s_game->g_sess_mgr,
-                       G_GAMETYPE_LOCAL_MULTIPLAYER, 1);
+                       G_GAMETYPE_LOCAL_MULTIPLAYER, 5);
     register_game(s_orche->r_mngr, s_orche->s_game->game);
     int ret = run_game_session(&s_orche->s_game->g_sess_mgr, &cfg);
     if (ret == 2) {
       return SCENE_RESULTS;
     }
   } else if (s_scene_code == SCENE_RESULTS) {
+    ResultReport report = s_calc_result_report(s_orche->s_game);
+    int succ =
+        s_setup_results(s_orche->s_results, report, s_orche->r_mngr->renderer);
+    if (!succ) {
+      printf("[ERROR] [S_ORCHE] err initializing resultboard\n");
+      return SCENE_QUIT;
+    }
     int ret = s_run_results_loop(s_orche);
     if (ret == RETURN_QUIT) {
       return SCENE_QUIT;
