@@ -126,6 +126,33 @@ int is_game_over(G_Game_Rules g_rules, G_Rule_Checker g_rule_checker) {
   return 0;
 }
 
+int is_game_draw(const Game* game) {
+  int score_max = 0;
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    const Player* plr_tmp = game->players[i];
+    if (plr_tmp != NULL) {
+      if (plr_tmp->score > score_max) {
+        score_max = plr_tmp->score;
+      }
+    }
+  }
+
+  int score_max_counter = 0;
+  for (size_t i = 0; i < G_MAX_PC_PLAYERS; i++) {
+    const Player* plr_tmp = game->players[i];
+    if (plr_tmp != NULL) {
+      if (plr_tmp->score == score_max) {
+        score_max_counter += 1;
+      }
+    }
+  }
+
+  if (score_max_counter == 1) {
+    return 0;
+  }
+  return 1;
+}
+
 // Function running the main game loop - updating the game each tick and
 // rendering it each tick. In essence, this is the standard "game loop wrapper"
 // common in the main() function. Note that this function is blocking - once
@@ -144,8 +171,9 @@ int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
   while (keep_running) {
     Uint64 start_time = SDL_GetPerformanceCounter();
     if (is_game_over(g_sess_mgr->g_rules, g_sess_mgr->g_rule_checker)) {
-      // printf("[G_SESS_MGR] Game is over based on rules\n");
-      return 2;
+      if (!is_game_draw(g_sess_mgr->game)) {
+        return 2;
+      }
     }
 
     while (SDL_PollEvent(&evt)) {
