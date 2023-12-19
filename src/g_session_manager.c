@@ -139,6 +139,8 @@ int run_game_session(G_Session_Manager* g_sess_mgr, F_Config* f_cfg) {
   SDL_Event evt;
   float max_delta = (1.0 / f_cfg->r_max_fps) * 1000.0;
   g_sess_mgr->g_rule_checker.time_elapsed = 0;
+  f_timer_init(&g_sess_mgr->f_timer);
+
   while (keep_running) {
     Uint64 start_time = SDL_GetPerformanceCounter();
     if (is_game_over(g_sess_mgr->g_rules, g_sess_mgr->g_rule_checker)) {

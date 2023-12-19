@@ -84,11 +84,12 @@ int main(void) {
     return 1;
   }
 
-  Game* game = initialize_game();
+  /*Game* game = initialize_game();
   if (game == NULL) {
     SDL_Quit();
     return 1;
   }
+  */
 
   F_Timer f_timer;
   f_timer_init(&f_timer);
@@ -99,35 +100,21 @@ int main(void) {
     return 1;
   }
 
-  S_Main_Menu* s_main_menu = s_new_main_menu(r_mngr->renderer);
-  if (s_main_menu == NULL) {
-    SDL_Quit();
-    return 1;
-  }
-
-  S_Results* s_results = s_new_results(r_mngr->font_storage, r_mngr->renderer);
-  if (s_results == NULL) {
-    SDL_Quit();
-    return 1;
-  }
-
   succ = s_orchestrator_register_r_mngr(s_orchestrator, r_mngr);
   if (!succ) {
     SDL_Quit();
     return 1;
   }
-  succ = s_orchestrator_register_s_main_menu(s_orchestrator, s_main_menu);
-  if (!succ) {
-    SDL_Quit();
-    return 1;
-  }
-  succ = s_orchestrator_register_s_results(s_orchestrator, s_results);
+
+  succ = s_orchestrator_load_all_scenes(s_orchestrator);
   if (!succ) {
     SDL_Quit();
     return 1;
   }
 
-  int ret = s_run_main_menu_loop(s_orchestrator);
+  s_orchestrate_scenes(s_orchestrator);
+
+  /*int ret = s_run_main_menu_loop(s_orchestrator);
   if (ret == RETURN_QUIT) {
     SDL_Quit();
     return 1;
@@ -148,8 +135,9 @@ int main(void) {
   run_game_session(&g_sess_mgr, &cfg);
 
   s_run_results_loop(s_orchestrator);
+  */
 
-  destroy_game(game);
+  // destroy_game(game);
   s_destroy_orchestrator(s_orchestrator);
   destroy_renderer_manager(r_mngr);
   SDL_DestroyWindow(window);
