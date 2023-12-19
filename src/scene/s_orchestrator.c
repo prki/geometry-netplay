@@ -196,21 +196,28 @@ int s_run_main_menu_loop(S_Orchestrator* s_orche) {
 
 // [TODO] All the "run loop" functions are going to work in a similar way - is
 // there any way to make them into a generic thing?
-int s_run_results_loop(S_Orchestrator* s_orche) {
+S_Scene_Code s_run_results_loop(S_Orchestrator* s_orche) {
   int keep_running = 1;
   SDL_Event evt;
   while (keep_running) {
     while (SDL_PollEvent(&evt)) {
       if (evt.type == SDL_QUIT) {
-        return RETURN_QUIT;
+        return SCENE_QUIT;
       }
+    }
+
+    if (ui_is_button_clicked(s_orche->s_results->rematch_btn)) {
+      return SCENE_GAME;
+    }
+    if (ui_is_button_clicked(s_orche->s_results->menu_btn)) {
+      return SCENE_MAIN_MENU;
     }
 
     r_render_s_results(s_orche->r_mngr, s_orche->s_results);
     r_display_frame(s_orche->r_mngr);
   }
 
-  return RETURN_QUIT;
+  return SCENE_QUIT;
 }
 
 // [TODO] We want to have better return code handling and such - but that will
@@ -228,9 +235,10 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
     // [TODO] This should probably be moved to some "scene_setup()" function?
     F_Config cfg = {.r_vsync = 1, .r_max_fps = 200};
     setup_game_session(&s_orche->s_game->g_sess_mgr,
-                       G_GAMETYPE_LOCAL_MULTIPLAYER, 5);
+                       G_GAMETYPE_LOCAL_MULTIPLAYER, 2);
     register_game(s_orche->r_mngr, s_orche->s_game->game);
     int ret = run_game_session(&s_orche->s_game->g_sess_mgr, &cfg);
+    r_unregister_game(s_orche->r_mngr);
     if (ret == 2) {
       return SCENE_RESULTS;
     }
@@ -242,13 +250,8 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
       printf("[ERROR] [S_ORCHE] err initializing resultboard\n");
       return SCENE_QUIT;
     }
-    int ret = s_run_results_loop(s_orche);
-    if (ret == RETURN_QUIT) {
-      return SCENE_QUIT;
-    } else {
-      printf("[WARN] [S_ORCHE] Unhandled return code from results\n");
-      return SCENE_QUIT;
-    }
+    S_Scene_Code ret = s_run_results_loop(s_orche);
+    return ret;
   } else {
     printf("[ERROR] Attempted to run a scene with an unhandled scene code\n");
     return SCENE_QUIT;

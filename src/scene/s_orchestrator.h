@@ -38,7 +38,7 @@ int s_orchestrator_register_s_results(S_Orchestrator* s_orche,
                                       S_Results* s_results);
 ResultReport s_calc_result_report(S_Game* s_game);
 int s_run_main_menu_loop(S_Orchestrator* s_orche);
-int s_run_results_loop(S_Orchestrator* s_orche);
+S_Scene_Code s_run_results_loop(S_Orchestrator* s_orche);
 int s_run_game_loop(S_Orchestrator* s_orche);
 void s_orchestrate_scenes(S_Orchestrator* s_orche);
 

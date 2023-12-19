@@ -15,6 +15,8 @@ S_Results* s_new_results(const FontStorage* r_fs, SDL_Renderer* renderer) {
   s_results->header_text = NULL;
   s_results->winner_text = NULL;
   s_results->loser_text = NULL;
+  s_results->menu_btn = NULL;
+  s_results->rematch_btn = NULL;
 
   const R_Font* font = r_get_font_by_id(r_fs, 0);
   R_Text* text = new_r_text(renderer, "Pekelna parba game results", 64, font);
@@ -23,8 +25,32 @@ S_Results* s_new_results(const FontStorage* r_fs, SDL_Renderer* renderer) {
     free(s_results);
     return NULL;
   }
+
+  UI_Button* btn_rematch = ui_new_button_from_paths(
+      1200, 800, 300, 32, "./assets/menu/rematch.bmp",
+      "./assets/menu/rematch_hover.bmp", NULL, renderer);
+  if (btn_rematch == NULL) {
+    printf("[ERROR] err s_new_results - new btn_rematch NULL\n");
+    r_destroy_text(text);
+    free(s_results);
+    return NULL;
+  }
+
+  UI_Button* btn_back = ui_new_button_from_paths(
+      100, 800, 300, 32, "./assets/menu/back_to_menu.bmp",
+      "./assets/menu/back_to_menu_hover.bmp", NULL, renderer);
+  if (btn_back == NULL) {
+    printf("[ERROR] err s_new_results - new btn_back NULL\n");
+    ui_destroy_button(btn_rematch);
+    r_destroy_text(text);
+    free(s_results);
+    return NULL;
+  }
+
   s_results->header_text = text;
   s_results->font = font;
+  s_results->rematch_btn = btn_rematch;
+  s_results->menu_btn = btn_back;
 
   return s_results;
 }
@@ -33,6 +59,12 @@ void s_destroy_results(S_Results* s_results) {
   if (s_results != NULL) {
     if (s_results->header_text != NULL) {
       r_destroy_text(s_results->header_text);
+    }
+    if (s_results->rematch_btn != NULL) {
+      ui_destroy_button(s_results->rematch_btn);
+    }
+    if (s_results->menu_btn != NULL) {
+      ui_destroy_button(s_results->menu_btn);
     }
     free(s_results);
   }
@@ -76,4 +108,7 @@ void s_render_s_results(S_Results* s_results, SDL_Renderer* renderer) {
 
   y = 300;
   r_render_text(s_results->loser_text, renderer, x, y);
+
+  ui_render_button(s_results->menu_btn, renderer);
+  ui_render_button(s_results->rematch_btn, renderer);
 }

@@ -232,6 +232,17 @@ int register_game(RendererManager* r_mngr, Game* game) {
   return 1;
 }
 
+// [TODO] Workaround to run game again until game becomes scene. Only players
+// should be unregistered, as the rest just accepts a pointer - no relevant
+// change. [TODO] DELME once game becomes a scene.
+void r_unregister_game(RendererManager* r_mngr) {
+  for (size_t i = 0; i < r_mngr->renderable_players_size; i++) {
+    r_mngr->renderable_players[i].player = NULL;
+    r_mngr->renderable_players[i].texture = NULL;
+  }
+  r_mngr->renderable_players_size = 0;
+}
+
 /* [TODO] Validate SDL_RenderCopy return code*/
 void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr) {
   SDL_Rect draw_rect;
