@@ -49,6 +49,8 @@ R_HUD* new_r_hud(const FontStorage* font_storage) {
   }
   hud->hud_font = NULL;
   hud->font_storage = font_storage;
+  hud->fps_text = NULL;
+  hud->clock_text = NULL;
 
   return hud;
 }

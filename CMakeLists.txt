@@ -52,6 +52,7 @@ add_executable(geometry-netplay
   src/renderer/font.c
   src/renderer/hud.c
   src/renderer/text.c
+  src/scene/s_game.c
   src/scene/s_main_menu.c
   src/scene/s_orchestrator.c
   src/scene/s_results.c

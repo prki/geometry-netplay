@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "../f_config.h"
+#include "../g_session_manager.h"
 #include "../renderer/renderer_manager.h"
 
 S_Orchestrator* s_new_orchestrator(void) {
@@ -14,6 +16,7 @@ S_Orchestrator* s_new_orchestrator(void) {
   ret->s_main_menu = NULL;
   ret->r_mngr = NULL;
   ret->s_results = NULL;
+  ret->s_game = NULL;
 
   return ret;
 }
@@ -28,10 +31,56 @@ void s_destroy_orchestrator(S_Orchestrator* s_orche) {
       s_destroy_results(s_orche->s_results);
       s_orche->s_results = NULL;
     }
+    if (s_orche->s_game != NULL) {
+      s_destroy_game(s_orche->s_game);
+      s_orche->s_game = NULL;
+    }
 
     free(s_orche);
     s_orche = NULL;
   }
+}
+
+// Function initializing all underlying scenes and registering them.
+// This is the function which should be used publicly, unless there is a
+// reason why only some scenes should be loaded. In our case, as the
+// footprint is tiny, we can just load all scenes and perform context switching
+// afterwards without any operations afterwards.
+// It is assumed the parameter s_orche (S_Orchestrator*) has r_mngr assigned, as
+// other scenes require access to SDL_Renderer*
+// Function does not clean up resources if any initialization fails, but its
+// state likely requires calling s_destroy_orchestrator(), since running the
+// game does not make sense at that point.
+// Returns 1 on success, 0 on failure.
+int s_orchestrator_load_all_scenes(S_Orchestrator* s_orche) {
+  if (s_orche->r_mngr == NULL) {
+    printf("[ERROR] Err loading scenes in s_orchestrator - r_mngr NULL\n");
+    return 0;
+  }
+
+  S_Main_Menu* s_main_menu = s_new_main_menu(s_orche->r_mngr->renderer);
+  if (s_main_menu == NULL) {
+    printf("[ERROR] Err loading scenes in s_orchestrator - s_main_menu NULL\n");
+    return 0;
+  }
+  s_orchestrator_register_s_main_menu(s_orche, s_main_menu);
+
+  S_Results* s_results =
+      s_new_results(s_orche->r_mngr->font_storage, s_orche->r_mngr->renderer);
+  if (s_results == NULL) {
+    printf("[ERROR] Err loading scenes in s_orchestrator - s_results NULL\n");
+    return 0;
+  }
+  s_orchestrator_register_s_results(s_orche, s_results);
+
+  S_Game* s_game = s_new_game(s_orche->r_mngr);
+  if (s_game == NULL) {
+    printf("[ERROR] Err loading scenes in s_orchestrator - s_game NULL\n");
+    return 0;
+  }
+  s_orchestrator_register_s_game(s_orche, s_game);
+
+  return 1;
 }
 
 int s_orchestrator_register_r_mngr(S_Orchestrator* s_orche,
@@ -46,6 +95,21 @@ int s_orchestrator_register_r_mngr(S_Orchestrator* s_orche,
   }
 
   s_orche->r_mngr = r_mngr;
+
+  return 1;
+}
+
+int s_orchestrator_register_s_game(S_Orchestrator* s_orche, S_Game* s_game) {
+  if (s_orche == NULL) {
+    printf("[ERROR] Err registering s_game to s_orche - s_orche NULL\n");
+    return 0;
+  }
+  if (s_game == NULL) {
+    printf("[ERROR] Err registering s_game to s_orche - s_game NULL\n");
+    return 0;
+  }
+
+  s_orche->s_game = s_game;
 
   return 1;
 }
@@ -107,13 +171,15 @@ int s_run_main_menu_loop(S_Orchestrator* s_orche) {
   return 1;
 }
 
+// [TODO] All the "run loop" functions are going to work in a similar way - is
+// there any way to make them into a generic thing?
 int s_run_results_loop(S_Orchestrator* s_orche) {
   int keep_running = 1;
   SDL_Event evt;
   while (keep_running) {
     while (SDL_PollEvent(&evt)) {
       if (evt.type == SDL_QUIT) {
-        return 2;
+        return RETURN_QUIT;
       }
     }
 
@@ -121,5 +187,56 @@ int s_run_results_loop(S_Orchestrator* s_orche) {
     r_display_frame(s_orche->r_mngr);
   }
 
-  return 1;
+  return RETURN_QUIT;
+}
+
+// [TODO] We want to have better return code handling and such - but that will
+// be easier to do once game is migrated to being a scene. Until then, this will
+// be kept ugly, since it can be, for the most part.
+S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
+  if (s_scene_code == SCENE_MAIN_MENU) {
+    int ret = s_run_main_menu_loop(s_orche);
+    if (ret == RETURN_NEW_GAME) {
+      return SCENE_GAME;
+    } else if (ret == RETURN_QUIT) {
+      return SCENE_QUIT;
+    }
+  } else if (s_scene_code == SCENE_GAME) {
+    // [TODO] This should probably be moved to some "scene_setup()" function?
+    F_Config cfg = {.r_vsync = 1, .r_max_fps = 200};
+    setup_game_session(&s_orche->s_game->g_sess_mgr,
+                       G_GAMETYPE_LOCAL_MULTIPLAYER, 1);
+    register_game(s_orche->r_mngr, s_orche->s_game->game);
+    int ret = run_game_session(&s_orche->s_game->g_sess_mgr, &cfg);
+    if (ret == 2) {
+      return SCENE_RESULTS;
+    }
+  } else if (s_scene_code == SCENE_RESULTS) {
+    int ret = s_run_results_loop(s_orche);
+    if (ret == RETURN_QUIT) {
+      return SCENE_QUIT;
+    } else {
+      printf("[WARN] [S_ORCHE] Unhandled return code from results\n");
+      return SCENE_QUIT;
+    }
+  } else {
+    printf("[ERROR] Attempted to run a scene with an unhandled scene code\n");
+    return SCENE_QUIT;
+  }
+
+  printf("[ERROR] s_run_scene unhandled scene run return\n");
+  return SCENE_QUIT;
+}
+
+// Highest-level function in the game engine, managing context of scenes running
+// and switching between scenes based on events.
+void s_orchestrate_scenes(S_Orchestrator* s_orche) {
+  S_Scene_Code scene = SCENE_MAIN_MENU;
+  int quit = 0;
+  while (!quit) {
+    scene = s_run_scene(s_orche, scene);
+    if (scene == SCENE_QUIT) {
+      quit = 1;
+    }
+  }
 }
