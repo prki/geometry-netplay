@@ -57,6 +57,7 @@ RendererManager* new_renderer_manager(SDL_Window* window,
                                       SDL_Renderer* renderer);
 void destroy_renderer_manager(RendererManager* r_mngr);
 int register_game(RendererManager* r_mngr, Game* game);
+void r_unregister_game(RendererManager* r_mngr);
 int register_player(RendererManager* r_mngr, Player* plr);
 void draw_player(RendererManager* r_mngr, RenderablePlayer* r_plr);
 void draw_rectangle_outline(RendererManager* r_mngr, const Rectangle* rect);

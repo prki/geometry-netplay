@@ -107,10 +107,16 @@ int setup_game_session(G_Session_Manager* g_sess_mgr, int gametype,
     succ = _setup_local_singleplayer(g_sess_mgr);
   } else {
     printf("[ERROR] Attempted to set up game session with unknown gametype\n");
-    succ = 0;
+    return 0;
   }
 
   g_sess_mgr->g_rules.timelimit = timelimit;
+  // [TODO] Workaround cleaning up bullet pool when rematching. This should be
+  // handled by the scene once game becomes a scene
+  for (size_t i = 0; i < g_sess_mgr->game->bullet_pool->pool_size; i++) {
+    Bullet* tmp = &g_sess_mgr->game->bullet_pool->bullets[i];
+    disable_bullet(tmp);
+  }
 
   return succ;
 }

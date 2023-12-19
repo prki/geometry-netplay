@@ -16,6 +16,10 @@ typedef struct {
 void ui_destroy_button(UI_Button* btn);
 UI_Button* ui_new_button(int x, int y, int w, int h, SDL_Texture* txtr,
                          SDL_Texture* txtr_hover, void (*on_click)(void));
+UI_Button* ui_new_button_from_paths(int x, int y, int w, int h,
+                                    const char* path, const char* path_hover,
+                                    void (*on_click)(void),
+                                    SDL_Renderer* renderer);
 int ui_is_button_clicked(UI_Button* btn);
 void ui_render_button(UI_Button* btn, SDL_Renderer* renderer);
 

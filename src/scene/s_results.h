@@ -4,6 +4,7 @@
 
 #include "../renderer/font.h"
 #include "../renderer/text.h"
+#include "../ui/ui.h"
 
 // Straightforward implementation for two players.
 // The report scoreboard should be sorted for multiple players ([TODO])
@@ -17,6 +18,8 @@ typedef struct {
   R_Text* winner_text;
   R_Text* loser_text;
   const R_Font* font;
+  UI_Button* rematch_btn;
+  UI_Button* menu_btn;
 } S_Results;
 
 S_Results* s_new_results(const FontStorage* r_fs, SDL_Renderer* renderer);
