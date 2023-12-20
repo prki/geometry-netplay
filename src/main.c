@@ -49,7 +49,7 @@ int initialize_SDL(SDL_Window** window, SDL_Renderer** renderer, F_Config cfg) {
   return 1;
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
   int succ = 0;
   SDL_Window* window = NULL;
   SDL_Renderer* renderer = NULL;
