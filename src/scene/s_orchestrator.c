@@ -80,6 +80,13 @@ int s_orchestrator_load_all_scenes(S_Orchestrator* s_orche) {
   }
   s_orchestrator_register_s_game(s_orche, s_game);
 
+  S_Boot* s_boot = s_new_boot(s_orche->r_mngr->renderer);
+  if (s_boot == NULL) {
+    printf("[ERROR] Err loading scenes in s_orchestrator - s_boot NULL\n");
+    return 0;
+  }
+  s_orchestrator_register_s_boot(s_orche, s_boot);
+
   return 1;
 }
 
@@ -95,6 +102,21 @@ int s_orchestrator_register_r_mngr(S_Orchestrator* s_orche,
   }
 
   s_orche->r_mngr = r_mngr;
+
+  return 1;
+}
+
+int s_orchestrator_register_s_boot(S_Orchestrator* s_orche, S_Boot* s_boot) {
+  if (s_orche == NULL) {
+    printf("[ERROR] Err registering s_boot to s_orche - s_orche NULL\n");
+    return 0;
+  }
+  if (s_boot == NULL) {
+    printf("[ERROR] Err registering s_boot to s_orche - s_boot NULL\n");
+    return 0;
+  }
+
+  s_orche->s_boot = s_boot;
 
   return 1;
 }
@@ -227,6 +249,32 @@ S_Scene_Code s_run_results_loop(S_Orchestrator* s_orche) {
   return SCENE_QUIT;
 }
 
+S_Scene_Code s_run_boot_loop(S_Orchestrator* s_orche) {
+  int keep_running = 1;
+  SDL_Event evt;
+  F_Timer f_timer;
+  f_timer_init(&f_timer);
+  int elapsed_time = 0;
+  while (keep_running) {
+    while (SDL_PollEvent(&evt)) {
+      if (evt.type == SDL_QUIT) {
+        return SCENE_QUIT;
+      }
+    }
+
+    SDL_RenderClear(s_orche->r_mngr->renderer);
+    s_render_s_boot(s_orche->s_boot, s_orche->r_mngr->renderer);
+    r_display_frame(s_orche->r_mngr);
+    f_timer_update(&f_timer);
+    elapsed_time += f_timer.delta_time;
+    if (elapsed_time >= 6000) {
+      return SCENE_MAIN_MENU;
+    }
+  }
+
+  return SCENE_MAIN_MENU;
+}
+
 // // [TODO] Should be in s_setup_results() but this being in r_manager and not
 // s_game makes it tough. Fix once game has a scene
 void s_setup_result_textures(S_Orchestrator* s_orche,
@@ -276,6 +324,8 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
     }
     S_Scene_Code ret = s_run_results_loop(s_orche);
     return ret;
+  } else if (s_scene_code == SCENE_BOOT) {
+    return s_run_boot_loop(s_orche);
   } else {
     printf("[ERROR] Attempted to run a scene with an unhandled scene code\n");
     return SCENE_QUIT;
@@ -288,7 +338,7 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
 // Highest-level function in the game engine, managing context of scenes running
 // and switching between scenes based on events.
 void s_orchestrate_scenes(S_Orchestrator* s_orche) {
-  S_Scene_Code scene = SCENE_MAIN_MENU;
+  S_Scene_Code scene = SCENE_BOOT;
   int quit = 0;
   while (!quit) {
     scene = s_run_scene(s_orche, scene);

@@ -5,6 +5,7 @@
 #include "../game.h"
 #include "../math/shapes.h"
 #include "../player.h"
+#include "../scene/s_boot.h"
 #include "../scene/s_main_menu.h"
 #include "../scene/s_results.h"
 #include "hud.h"
@@ -67,6 +68,7 @@ int r_load_assets_fonts(RendererManager* r_mngr);
 void render_frame(RendererManager* r_mngr, double delta_time);
 void r_render_s_main_menu(RendererManager* r_mngr, S_Main_Menu* s_menu);
 void r_render_s_results(RendererManager* r_mngr, S_Results* s_results);
+void r_render_s_boot(RendererManager* r_mngr, S_Boot* s_boot);
 void r_display_frame(RendererManager* r_mngr);
 
 #endif  // _RENDERER_MANAGER_H
