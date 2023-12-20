@@ -257,7 +257,7 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
     // [TODO] This should probably be moved to some "scene_setup()" function?
     F_Config cfg = {.r_vsync = 1, .r_max_fps = 200};
     setup_game_session(&s_orche->s_game->g_sess_mgr,
-                       G_GAMETYPE_LOCAL_MULTIPLAYER, 2);
+                       G_GAMETYPE_LOCAL_MULTIPLAYER, 120);
     register_game(s_orche->r_mngr, s_orche->s_game->game);
     int ret = run_game_session(&s_orche->s_game->g_sess_mgr, &cfg);
     r_unregister_game(s_orche->r_mngr);

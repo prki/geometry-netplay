@@ -77,8 +77,8 @@ int s_setup_results(S_Results* s_results, const ResultReport result_report,
                     SDL_Renderer* renderer) {
   char winner_buf[128];
   char loser_buf[128];
-  sprintf(winner_buf, "Winner: Player %d", result_report.score_winner);
-  sprintf(loser_buf, "Loser: Player %d", result_report.score_loser);
+  sprintf(winner_buf, "Winner score: %d", result_report.score_winner);
+  sprintf(loser_buf, "Loser score: %d", result_report.score_loser);
   R_Text* winner_text = new_r_text(renderer, winner_buf, 64, s_results->font);
   if (winner_text == NULL) {
     printf("[ERROR] [S_RESULTS] err creating winner text\n");
