@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "../asset_loader.h"
+#include "../renderer/r_image.h"
 #include "../ui/ui.h"
 
 // Private function called by s_new_main_menu()
@@ -90,6 +91,27 @@ S_Main_Menu* s_new_main_menu(SDL_Renderer* renderer) {
     return NULL;
   }
 
+  ret->header_image = r_new_image_from_path("./assets/menu/menu_header.bmp",
+                                            800, 200, renderer);
+  if (ret->header_image == NULL) {
+    printf("[ERROR] err new main menu scene - new header image fail\n");
+    ui_destroy_button(quit_btn);
+    ui_destroy_button(new_game_btn);
+    free(ret);
+    return NULL;
+  }
+
+  ret->footer_image = r_new_image_from_path("./assets/menu/menu_footer.bmp",
+                                            800, 200, renderer);
+  if (ret->footer_image == NULL) {
+    printf("[ERROR] err new main menu scene - new footer image fail\n");
+    ui_destroy_button(quit_btn);
+    ui_destroy_button(new_game_btn);
+    r_destroy_image(ret->header_image);
+    free(ret);
+    return NULL;
+  }
+
   ret->quit_btn = quit_btn;
   ret->new_game_btn = new_game_btn;
 
@@ -101,6 +123,15 @@ void s_destroy_main_menu(S_Main_Menu* s_menu) {
     if (s_menu->quit_btn != NULL) {
       ui_destroy_button(s_menu->quit_btn);
     }
+    if (s_menu->new_game_btn != NULL) {
+      ui_destroy_button(s_menu->new_game_btn);
+    }
+    if (s_menu->header_image != NULL) {
+      r_destroy_image(s_menu->header_image);
+    }
+    if (s_menu->footer_image != NULL) {
+      r_destroy_image(s_menu->footer_image);
+    }
 
     free(s_menu);
   }
@@ -109,4 +140,6 @@ void s_destroy_main_menu(S_Main_Menu* s_menu) {
 void s_render_s_main_menu(S_Main_Menu* menu, SDL_Renderer* renderer) {
   ui_render_button(menu->quit_btn, renderer);
   ui_render_button(menu->new_game_btn, renderer);
+  r_render_image(menu->header_image, renderer, 400, 50);
+  r_render_image(menu->footer_image, renderer, 400, 600);
 }
