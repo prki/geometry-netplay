@@ -28,23 +28,18 @@ void _deinitialize_game(Game* game) {
   free(game);
 }
 
-// [TODO] DELME once moved to g_sess_mgr
-/*Player* _initialize_pc_player(void) {
-  vec2d initial_ship_position = {.x = 600, .y = 600};
-  double hurtcirc_radius = 8;
-  size_t ship_width = 32;
-  vec2d shoot_direction = {.x = 0, .y = -1};
-
-  return new_player(initial_ship_position, hurtcirc_radius, ship_width,
-                    shoot_direction);
-}
-*/
-
 void _initialize_spawn_points(Game* game) {
-  game->spawn_points[0] = (vec2d){.x = 800, .y = 800};
-  game->spawn_points[1] = (vec2d){.x = 600, .y = 100};
+  int x_increment = 200;
+  int y_increment = 200;
+  int i = 0;
+  for (int x = 100; x < 1500; x += x_increment) {
+    for (int y = 100; y < 800; y += y_increment) {
+      game->spawn_points[i] = (vec2d){.x = x, .y = y};
+      i++;
+    }
+  }
 
-  game->spawn_points_size = 2;
+  game->spawn_points_size = i;
 }
 
 vec2d get_random_spawnpoint(Game* game) {

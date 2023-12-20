@@ -7,7 +7,7 @@
 
 #define MAX_RECTS 300
 #define MAX_AI_PLAYERS 16
-#define SPAWN_POINTS_MAX_SIZE 32
+#define SPAWN_POINTS_MAX_SIZE 128
 #define G_MAX_PC_PLAYERS 2
 
 typedef struct Game {

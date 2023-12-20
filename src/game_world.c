@@ -41,15 +41,8 @@ GameWorld* new_game_world(void) {
     return NULL;
   }
 
-  Rectangle test_rect = new_rectangle(90, 90, 40, 120);
-  Rectangle test_rect2 = new_rectangle(240, 300, 120, 40);
+  Rectangle test_rect = new_rectangle(780, 430, 40, 40);
   rectanglearray_insert_rectangle(rect_arr, &test_rect);
-  rectanglearray_insert_rectangle(rect_arr, &test_rect2);
-
-  Rectangle nested1 = new_rectangle(100, 100, 120, 40);
-  Rectangle nested2 = new_rectangle(120, 120, 60, 60);
-  rectanglearray_insert_rectangle(rect_arr, &nested1);
-  rectanglearray_insert_rectangle(rect_arr, &nested2);
 
   GameWorld* ret = malloc(sizeof(GameWorld));
   if (ret == NULL) {

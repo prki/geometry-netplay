@@ -44,7 +44,7 @@ void add_ai_player_to_session(G_Session_Manager* g_sess_mgr) {
 int _setup_local_multiplayer(G_Session_Manager* g_sess_mgr) {
   F_Controls controls_p1 = f_default_player1_controls();
   vec2d p1_initial_ship_pos = {.x = 150, .y = 416};
-  double hurtcirc_radius = 8;
+  double hurtcirc_radius = 12;
   size_t ship_width = 32;
   vec2d shoot_direction = {.x = 0, .y = -1};
   Player* p1 = new_pc_player(p1_initial_ship_pos, hurtcirc_radius, ship_width,
