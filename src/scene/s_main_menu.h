@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 
+#include "../audio/a_sound.h"
 #include "../renderer/r_image.h"
 #include "../ui/ui.h"
 
@@ -17,6 +18,7 @@ typedef struct {
   UI_Button* quit_btn;
   R_Image* header_image;
   R_Image* footer_image;
+  A_Sound* music;
 } S_Main_Menu;
 
 S_Main_Menu* s_new_main_menu(SDL_Renderer* renderer);

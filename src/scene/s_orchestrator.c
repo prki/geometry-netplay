@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "../audio/a_sound.h"
 #include "../f_config.h"
 #include "../g_session_manager.h"
 #include "../renderer/renderer_manager.h"
@@ -203,6 +204,7 @@ ResultReport s_calc_result_report(S_Orchestrator* s_orche) {
 int s_run_main_menu_loop(S_Orchestrator* s_orche) {
   int keep_running = 1;
   SDL_Event evt;
+  a_play_sound(s_orche->s_main_menu->music);
   while (keep_running) {
     while (SDL_PollEvent(&evt)) {
       if (evt.type == SDL_QUIT) {
@@ -307,6 +309,7 @@ S_Scene_Code s_run_scene(S_Orchestrator* s_orche, S_Scene_Code s_scene_code) {
     setup_game_session(&s_orche->s_game->g_sess_mgr,
                        G_GAMETYPE_LOCAL_MULTIPLAYER, 120);
     register_game(s_orche->r_mngr, s_orche->s_game->game);
+    a_play_sound(s_orche->s_game->music);
     int ret = run_game_session(&s_orche->s_game->g_sess_mgr, &cfg);
     r_unregister_game(s_orche->r_mngr);
     if (ret == 2) {
