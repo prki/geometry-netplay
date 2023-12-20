@@ -47,6 +47,7 @@ add_executable(geometry-netplay
   src/math/trigonometry.c
   src/math/shapes.c
   src/math/collections.c
+  src/renderer/r_image.c
   src/renderer/renderer_manager.c
   src/renderer/particle.c
   src/renderer/font.c

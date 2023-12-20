@@ -10,7 +10,7 @@
 // gun/powerup/player
 #define BULLET_VELOCITY 1200
 #define BULLET_WIDTH 4
-#define BULLET_HEIGHT 24
+#define BULLET_HEIGHT 8
 
 void disable_bullet(Bullet* bullet) {
   bullet->is_active = 0;
