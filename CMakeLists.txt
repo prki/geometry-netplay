@@ -23,7 +23,14 @@ FetchContent_Declare(SDL2_ttf
     GIT_PROGRESS TRUE
 )
 
-FetchContent_MakeAvailable(SDL2 SDL2_ttf)
+FetchContent_Declare(
+  SDL2_mixer
+  GIT_REPOSITORY "https://github.com/libsdl-org/SDL_mixer"
+  GIT_TAG release-2.6.3
+  GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(SDL2 SDL2_ttf SDL2_mixer)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wall -g")
@@ -61,5 +68,5 @@ add_executable(geometry-netplay
   src/ui/ui.c
 )
 
-target_link_libraries(geometry-netplay SDL2main SDL2_ttf m)
+target_link_libraries(geometry-netplay SDL2main SDL2_ttf SDL2_mixer m)
 target_include_directories(geometry-netplay PUBLIC ${sdl2_SOURCE_DIR}/include)

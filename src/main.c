@@ -1,14 +1,12 @@
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <stdio.h>
 #include <time.h>
 
 #include "SDL_video.h"
 #include "constants.h"
 #include "f_timer.h"
-#include "g_session_manager.h"
-#include "game.h"
 #include "renderer/renderer_manager.h"
-#include "scene/s_main_menu.h"
 #include "scene/s_orchestrator.h"
 
 // This game has been programmed to assume VSYNC is on - however, physics
