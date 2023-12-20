@@ -90,6 +90,8 @@ S_Main_Menu* s_new_main_menu(SDL_Renderer* renderer) {
     ui_destroy_button(new_game_btn);
     return NULL;
   }
+  ret->new_game_btn = new_game_btn;
+  ret->quit_btn = quit_btn;
 
   ret->header_image = r_new_image_from_path("./assets/menu/menu_header.bmp",
                                             800, 200, renderer);
@@ -112,8 +114,12 @@ S_Main_Menu* s_new_main_menu(SDL_Renderer* renderer) {
     return NULL;
   }
 
-  ret->quit_btn = quit_btn;
-  ret->new_game_btn = new_game_btn;
+  ret->music = a_new_sound("./assets/pekelnaparbamp3.mp3");
+  if (ret->music == NULL) {
+    printf("[ERROR] Err s_new_main_menu - loading music failed\n");
+    s_destroy_main_menu(ret);
+    return NULL;
+  }
 
   return ret;
 }
@@ -131,6 +137,9 @@ void s_destroy_main_menu(S_Main_Menu* s_menu) {
     }
     if (s_menu->footer_image != NULL) {
       r_destroy_image(s_menu->footer_image);
+    }
+    if (s_menu->music != NULL) {
+      a_destroy_sound(s_menu->music);
     }
 
     free(s_menu);

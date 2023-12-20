@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "SDL_video.h"
+#include "audio/a_sound.h"
 #include "constants.h"
 #include "f_timer.h"
 #include "renderer/renderer_manager.h"
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
   srand(time(NULL));
   F_Config cfg = {.r_vsync = !VSYNC_ON, .r_max_fps = MAX_FPS};
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     return 1;
   }
@@ -66,6 +67,12 @@ int main(int argc, char* argv[]) {
     return 1;
   } else if (window == NULL || renderer == NULL) {
     SDL_Quit();
+    return 1;
+  }
+
+  Mix_Init(MIX_INIT_MP3);
+  if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1) {
+    printf("[ERROR] Mix_OpenAudio error: %s\n", Mix_GetError());
     return 1;
   }
 
@@ -81,13 +88,6 @@ int main(int argc, char* argv[]) {
     destroy_renderer_manager(r_mngr);
     return 1;
   }
-
-  /*Game* game = initialize_game();
-  if (game == NULL) {
-    SDL_Quit();
-    return 1;
-  }
-  */
 
   F_Timer f_timer;
   f_timer_init(&f_timer);
@@ -136,6 +136,7 @@ int main(int argc, char* argv[]) {
   */
 
   // destroy_game(game);
+  Mix_CloseAudio();
   s_destroy_orchestrator(s_orchestrator);
   destroy_renderer_manager(r_mngr);
   SDL_DestroyWindow(window);

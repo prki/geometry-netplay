@@ -50,6 +50,7 @@ add_executable(geometry-netplay
   src/g_session_manager.c
   src/f_timer.c
   src/f_controls.c
+  src/audio/a_sound.c
   src/math/vector.c
   src/math/trigonometry.c
   src/math/shapes.c
