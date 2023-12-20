@@ -461,6 +461,13 @@ void r_render_s_results(RendererManager* r_mngr, S_Results* s_results) {
   s_render_s_results(s_results, r_mngr->renderer);
 }
 
+void r_render_s_boot(RendererManager* r_mngr, S_Boot* s_boot) {
+  SDL_SetRenderDrawColor(r_mngr->renderer, 0, 0, 0, 255);
+  SDL_RenderClear(r_mngr->renderer);
+
+  s_render_s_boot(s_boot, r_mngr->renderer);
+}
+
 void r_render_background(RendererManager* r_mngr) {
   SDL_Rect dest_rect = {.x = 0, .y = 0, .w = 1600, .h = 900};
   SDL_RenderCopy(r_mngr->renderer, r_mngr->background, NULL, &dest_rect);
